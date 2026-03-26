@@ -233,14 +233,31 @@
             }
         }
 
-        async function vote(id, v) {
-            if(localStorage.getItem('voted_'+id)) return alert("Déjà voté !");
-            const { error } = await supabaseClient.from('propositions').update({ votes: v + 1 }).eq('id', id);
-            if(!error) {
-                localStorage.setItem('voted_'+id, 'true');
-                location.reload();
-            }
+async function vote(id, currentVotes) {
+    // Vérifier si l'utilisateur a déjà voté dans ce navigateur
+    if (localStorage.getItem('voted_' + id)) {
+        return alert("Vous avez déjà voté pour cet emplacement !");
+    }
+
+    // On appelle la fonction SQL que l'on vient de créer
+    const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
+
+    if (!error) {
+        // On enregistre le vote localement pour bloquer les votes multiples
+        localStorage.setItem('voted_' + id, 'true');
+        
+        // On met à jour l'affichage immédiatement sans recharger
+        const voteElement = document.getElementById('v-' + id);
+        if (voteElement) {
+            voteElement.innerText = parseInt(voteElement.innerText) + 1;
         }
+        
+        alert("Merci ! Votre vote a été pris en compte.");
+    } else {
+        console.error("Erreur de vote:", error);
+        alert("Désolé, une erreur est survenue lors du vote.");
+    }
+}
 
         loadMarkers();
     </script>
