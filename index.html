@@ -29,18 +29,18 @@
         
         .header-title-container { text-align: center; max-width: 60%; }
         .fancy-title {
-            font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
+            font-size: 1.4rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-transform: uppercase; letter-spacing: -0.5px; margin: 0; line-height: 1.1;
         }
 
         #map { height: calc(100vh - var(--header-h)); width: 100%; }
 
-        /* MODALE */
+        /* MODALE AIDE */
         #help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: white; padding: 25px; border-radius: 15px; max-width: 500px; max-height: 85vh; overflow-y: auto; }
 
-        /* POPUPS & FORM */
+        /* FORMULAIRE & POPUPS */
         .popup-form { min-width: 260px; font-size: 13px; }
         .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
         .info-rgpd { background: #f0f7ff; padding: 10px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; color: #004085; line-height: 1.3; }
@@ -48,8 +48,12 @@
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
 
+        /* AJUSTEMENT CONTROLES CARTE */
+        .leaflet-top.leaflet-right { top: 10px; right: 10px; }
+        .leaflet-control-layers { margin-top: 50px !important; }
+
         @media (max-width: 600px) {
-            .fancy-title { font-size: 0.9rem; }
+            .fancy-title { font-size: 1rem; }
             .header-logo { height: 45px; }
             header { height: 75px; }
             #map { height: calc(100vh - 75px); }
@@ -61,7 +65,7 @@
     <header>
         <img src="https://upload.wikimedia.org/wikipedia/fr/4/41/Logo_Athis-Mons.svg" alt="Athis-Mons" class="header-logo">
         <div class="header-title-container">
-            <h1 class="fancy-title">Nouvelle corbeille de rue :<br>Dites-nous où !</h1>
+            <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>Dites-nous où !</h1>
         </div>
         <button class="help-btn" onclick="toggleHelp()">?</button>
     </header>
@@ -76,15 +80,15 @@
                 Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre et un cadre de vie plus agréable au quotidien.
             </p>
             <ol>
-                <li><strong>Proposez :</strong> Cliquez à l'intérieur des limites bleues de la ville.</li>
-                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
+                <li><strong>Proposez :</strong> Cliquez n'importe où à l'intérieur des limites bleues de la ville.</li>
+                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et pourquoi une corbeille est nécessaire.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
             <hr>
             <h4>Utilisation des données & Cookies</h4>
             <p style="font-size: 12px; color: #666;">
-                - <strong>LocalStorage :</strong> Utilisé pour mémoriser vos coordonnées sur cet appareil.<br>
-                - <strong>LocalStorage (voted_ID) :</strong> Utilisé pour limiter les votes multiples par personne.<br>
+                - <strong>LocalStorage :</strong> Mémorise vos nom, email et téléphone sur cet appareil.<br>
+                - <strong>Votes :</strong> Un seul vote par emplacement est autorisé par utilisateur.<br>
                 - <strong>Confidentialité :</strong> Seule la description est publique. Vos coordonnées sont réservées aux services municipaux.
             </p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
@@ -108,18 +112,23 @@
         const map = L.map('map', { zoomControl: false, maxZoom: 21 }).setView([48.707, 2.387], 14);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM', maxNativeZoom: 19, maxZoom: 21 }).addTo(map);
-        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri Satellite', maxNativeZoom: 19, maxZoom: 21 });
+        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
+            attribution: '© OSM', maxNativeZoom: 19, maxZoom: 21 
+        }).addTo(map);
+
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { 
+            attribution: 'Esri Satellite', maxNativeZoom: 19, maxZoom: 21 
+        });
 
         L.control.layers({ "Plan": plan, "Aérien": satellite }, null, { position: 'topright' }).addTo(map);
 
         const markersCluster = L.markerClusterGroup();
         map.addLayer(markersCluster);
 
+        // Limites ville
         L.geoJSON(athisGeoJSON, { style: { color: "#0056b3", weight: 3, fillOpacity: 0.05, dashArray: "5, 10" } }).addTo(map);
 
-        // Mémoire locale des marqueurs pour mise à jour sans reload
-        let allMarkers = {};
+        let allMarkers = {}; // Stockage local des objets marqueurs
 
         function isPointInPoly(pt, poly) {
             let x = pt.lng, y = pt.lat;
@@ -139,7 +148,6 @@
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // Fonction pour générer le contenu de la bulle
         function getPopupHTML(p) {
             const hasVoted = localStorage.getItem('voted_' + p.id);
             return `
@@ -156,14 +164,14 @@
             `;
         }
 
-        // Ajouter ou mettre à jour un marqueur sur la carte
         function upsertMarker(p) {
             if (allMarkers[p.id]) {
-                // Mise à jour de la donnée et de la popup
                 allMarkers[p.id].data = p;
                 allMarkers[p.id].setPopupContent(getPopupHTML(p));
+                // Mettre à jour le texte du compteur si la popup est ouverte
+                const countEl = document.getElementById('v-' + p.id);
+                if (countEl) countEl.innerText = p.votes;
             } else {
-                // Création
                 const m = L.marker([p.lat, p.lng], { icon: binIcon });
                 m.data = p;
                 m.bindPopup(getPopupHTML(p));
@@ -179,15 +187,13 @@
             }
         }
 
-        // --- REALTIME : Mise à jour automatique ---
+        // Temps Réel
         supabaseClient
-            .channel('schema-db-changes')
+            .channel('db-changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
-                // Si c'est un nouvel insert ou un update (vote)
-                // Note: La vue ne supporte pas le realtime direct, on écoute la table et on simule l'objet public
                 const p = payload.new;
-                const publicObj = { id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at };
-                upsertMarker(publicObj);
+                // On simule l'objet public pour la fonction upsert
+                upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
             })
             .subscribe();
 
@@ -233,14 +239,16 @@
             localStorage.setItem('user_email', email);
             localStorage.setItem('user_tel', telephone);
 
-            const { error } = await supabaseClient.from('propositions').insert([{ 
-                lat, lng, nom_complet: nom, email, telephone, raison, consentement_rgpd: rgpd 
-            }]);
+            const { data, error } = await supabaseClient
+                .from('propositions')
+                .insert([{ lat, lng, nom_complet: nom, email, telephone, raison, consentement_rgpd: rgpd }])
+                .select();
 
-            if (!error) {
-                alert("Merci ! Votre proposition a été enregistrée.");
+            if (!error && data) {
+                const p = data[0];
+                upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
                 map.closePopup();
-                // Le Realtime s'occupera d'afficher le marqueur sans recharger
+                alert("Merci ! Votre proposition a été enregistrée.");
             } else {
                 alert("Erreur lors de l'envoi.");
             }
@@ -252,24 +260,4 @@
             const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
 
             if(!error) {
-                localStorage.setItem('voted_'+id, 'true');
-                
-                // On met à jour l'objet local immédiatement pour la persistance bulle
-                const m = allMarkers[id];
-                if(m) {
-                    m.data.votes += 1;
-                    m.setPopupContent(getPopupHTML(m.data));
-                    
-                    // On force l'ouverture pour voir le changement (ou on laisse l'utilisateur le voir)
-                    const countEl = document.getElementById('v-' + id);
-                    if(countEl) countEl.innerText = m.data.votes;
-                    const btnEl = document.getElementById('btn-' + id);
-                    if(btnEl) { btnEl.disabled = true; btnEl.innerText = "Voté !"; }
-                }
-            }
-        }
-
-        loadMarkers();
-    </script>
-</body>
-</html>
+                local
