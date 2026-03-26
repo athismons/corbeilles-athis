@@ -15,7 +15,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root { --primary: #0056b3; --accent: #28a745; --header-h: 70px; }
+        :root { --primary: #0056b3; --accent: #28a745; --header-h: 75px; }
         body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #f4f4f4; }
 
         header {
@@ -24,33 +24,36 @@
             position: relative; z-index: 1001;
         }
         .logo-area { display: flex; align-items: center; gap: 10px; }
-        .logo-area img { height: 45px; }
+        .logo-area img { height: 50px; }
         h1 { font-size: 1rem; color: var(--primary); margin: 0; line-height: 1.2; }
 
         #map { height: calc(100vh - var(--header-h)); width: 100%; }
 
-        /* Bouton Aide */
-        .help-btn { background: #eee; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; }
+        .help-btn { background: #eee; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; font-size: 1.2rem; }
 
         /* Modale Aide */
         #help-modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
         }
-        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative; }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 450px; max-height: 85vh; overflow-y: auto; position: relative; }
 
         /* Formulaires Popups */
-        .popup-form { min-width: 240px; font-size: 13px; }
+        .popup-form { min-width: 250px; font-size: 13px; padding: 5px; }
         .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
-        .rgpd-box { display: flex; gap: 8px; font-size: 11px; color: #555; margin-bottom: 10px; align-items: flex-start; }
-        .rgpd-box input { width: auto; margin: 0; }
+        .rgpd-box { display: flex; gap: 8px; font-size: 11px; color: #555; margin-bottom: 12px; align-items: flex-start; }
+        .rgpd-box input { width: auto; margin: 0; margin-top: 2px; }
         
         .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
         .vote-box { text-align: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; }
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
-        .btn-vote:disabled { background: #ccc; }
+        .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
 
-        @media (max-width: 600px) { h1 { font-size: 0.85rem; } .logo-area img { height: 35px; } }
+        /* Clustering Style */
+        .marker-cluster-small { background-color: rgba(0, 86, 179, 0.6); }
+        .marker-cluster-small div { background-color: rgba(0, 86, 179, 1); color: white; }
+
+        @media (max-width: 600px) { h1 { font-size: 0.85rem; } .logo-area img { height: 40px; } }
     </style>
 </head>
 <body>
@@ -68,25 +71,25 @@
     <!-- Modale Aide -->
     <div id="help-modal" onclick="toggleHelp()">
         <div class="modal-content" onclick="event.stopPropagation()">
-            <h2 style="color:var(--primary); margin-top:0;">Comment ça marche ?</h2>
-            <p>Participez à la propreté d'Athis-Mons en suggérant des lieux nécessitant une corbeille.</p>
+            <h2 style="color:var(--primary); margin-top:0;">Démocratie Participative</h2>
+            <p>Aidez les services techniques de la ville à identifier les besoins en corbeilles de rue.</p>
             <ol>
-                <li><strong>Cliquez sur la carte</strong> à l'endroit précis de votre choix.</li>
-                <li>Remplissez le formulaire (vos coordonnées restent privées).</li>
-                <li><strong>Votez</strong> pour les propositions de vos voisins.</li>
+                <li><strong>Proposez :</strong> Cliquez sur la carte à l'endroit souhaité.</li>
+                <li><strong>Votez :</strong> Cliquez sur une corbeille déjà proposée par un citoyen.</li>
             </ol>
-            <div style="background:#f0f7ff; padding:10px; border-radius:8px; font-size:12px;">
-                <strong>RGPD :</strong> Vos données (nom, email, tel) sont uniquement traitées par les services de la mairie pour valider la demande. Elles ne sont jamais publiées.
+            <div style="background:#f0f7ff; padding:15px; border-radius:8px; font-size:12px; border-left: 4px solid var(--primary);">
+                <strong>RGPD :</strong> Conformément au règlement, vos coordonnées (nom, tel, email) sont strictement confidentielles. Seule la "Raison" de votre proposition est publique.
             </div>
             <br>
-            <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
+            <button class="btn-submit" onclick="toggleHelp()">J'ai compris</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION SUPABASE ---
+        // --- CONFIGURATION ---
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co'; 
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';  
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';     
+        // Correction : Changement du nom pour éviter le conflit avec la bibliothèque
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- ICONE PERSONNALISÉE ---
@@ -96,69 +99,70 @@
         });
 
         // --- INITIALISATION CARTE ---
-        const map = L.map('map', { zoomControl: false }).setView([48.707, 2.387], 15);
+        // Correction : Ajout de maxZoom pour MarkerCluster
+        const map = L.map('map', { zoomControl: false, maxZoom: 19 }).setView([48.707, 2.387], 15);
         L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-        const markers = L.markerClusterGroup(); // CLUSTERING
-        map.addLayer(markers);
+        const markersCluster = L.markerClusterGroup({ disableClusteringAtZoom: 17 });
+        map.addLayer(markersCluster);
 
         const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
         const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri Satellite' });
-        L.control.layers({ "Plan": plan, "Vue Satellite": satellite }, null, { position: 'bottomleft' }).addTo(map);
+        L.control.layers({ "Plan de ville": plan, "Vue Satellite": satellite }, null, { position: 'bottomleft' }).addTo(map);
 
         function toggleHelp() {
             const m = document.getElementById('help-modal');
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
-        // --- CHARGEMENT DES MARQUEURS ---
+        // --- CHARGEMENT ---
         async function loadMarkers() {
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
-                markers.clearLayers();
+                markersCluster.clearLayers();
                 data.forEach(p => {
                     const dateStr = new Date(p.created_at).toLocaleDateString('fr-FR');
                     const m = L.marker([p.lat, p.lng], { icon: binIcon });
                     
                     const content = `
                         <div class="popup-form">
-                            <small>Le ${dateStr}</small>
-                            <p style="font-weight:bold; margin: 8px 0; font-size:14px;">"${p.raison}"</p>
+                            <small style="color:#666">Suggéré le ${dateStr}</small>
+                            <p style="font-weight:bold; margin: 10px 0; font-size:14px; line-height:1.4;">"${p.raison}"</p>
                             <div class="vote-box">
                                 <span style="font-size:16px;">👍 <b id="v-${p.id}">${p.votes}</b> votes</span><br>
-                                <button id="btn-${p.id}" class="btn-vote" onclick="vote(${p.id}, ${p.votes})">Voter</button>
+                                <button id="btn-${p.id}" class="btn-vote" onclick="vote(${p.id}, ${p.votes})">Soutenir cette idée</button>
                             </div>
                         </div>
                     `;
                     m.bindPopup(content);
-                    markers.addLayer(m);
+                    markersCluster.addLayer(m);
                 });
             }
         }
 
-        // --- CLIC CARTE : FORMULAIRE ---
+        // --- CLIC : PROPOSITION ---
         map.on('click', function(e) {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
             const form = `
                 <div class="popup-form">
-                    <h3 style="margin:0 0 10px 0; color:var(--primary);">Suggérer ce lieu</h3>
-                    <input type="text" id="f_nom" placeholder="Nom">
-                    <input type="text" id="f_prenom" placeholder="Prénom">
-                    <input type="email" id="f_email" placeholder="Email">
-                    <input type="tel" id="f_tel" placeholder="Téléphone">
-                    <textarea id="f_raison" placeholder="Justifiez votre choix (ex: proximité école...)" rows="3"></textarea>
+                    <h3 style="margin:0 0 12px 0; color:var(--primary); font-size:1.1rem;">Proposer cet emplacement</h3>
+                    <input type="text" id="f_nom" placeholder="Votre Nom" required>
+                    <input type="text" id="f_prenom" placeholder="Votre Prénom" required>
+                    <input type="email" id="f_email" placeholder="Email" required>
+                    <input type="tel" id="f_tel" placeholder="Téléphone" required>
+                    <textarea id="f_raison" placeholder="Pourquoi installer une corbeille ici ?" rows="3" required></textarea>
                     <div class="rgpd-box">
                         <input type="checkbox" id="f_rgpd">
-                        <label for="f_rgpd">J'accepte que la mairie traite mes données pour cette demande.</label>
+                        <label for="f_rgpd">J'accepte que mes données soient transmises aux services de la ville d'Athis-Mons.</label>
                     </div>
-                    <button class="btn-submit" onclick="submitData(${lat}, ${lng})">Envoyer</button>
+                    <button class="btn-submit" onclick="submitData(${lat}, ${lng})">Soumettre ma proposition</button>
                 </div>
             `;
             L.popup().setLatLng(e.latlng).setContent(form).openOn(map);
         });
 
-        // --- ENVOI DES DONNÉES ---
+        // --- ENVOI ---
         async function submitData(lat, lng) {
             const fields = {
                 nom: document.getElementById('f_nom').value,
@@ -169,7 +173,7 @@
                 consentement_rgpd: document.getElementById('f_rgpd').checked
             };
 
-            if(!fields.nom || !fields.prenom || !fields.email || !fields.telephone || !fields.raison) return alert("Tous les champs sont requis.");
+            if(!fields.nom || !fields.prenom || !fields.email || !fields.telephone || !fields.raison) return alert("Merci de remplir tous les champs.");
             if(!fields.consentement_rgpd) return alert("Le consentement RGPD est obligatoire.");
 
             const { error } = await supabaseClient.from('propositions').insert([{ lat, lng, ...fields }]);
@@ -178,19 +182,19 @@
                 alert("Merci ! Votre proposition est enregistrée.");
                 location.reload();
             } else {
-                alert("Erreur lors de l'envoi.");
+                alert("Erreur de connexion à la base de données.");
             }
         }
 
-        // --- SYSTÈME DE VOTE ---
+        // --- VOTE ---
         async function vote(id, currentVotes) {
-            if(localStorage.getItem('voted-' + id)) return alert("Vous avez déjà voté.");
+            if(localStorage.getItem('voted-' + id)) return alert("Vous avez déjà voté pour cet emplacement.");
             
             const { error } = await supabaseClient.from('propositions').update({ votes: currentVotes + 1 }).eq('id', id);
             
             if (!error) {
                 localStorage.setItem('voted-' + id, 'true');
-                alert("Vote pris en compte !");
+                alert("Merci pour votre vote !");
                 location.reload();
             }
         }
