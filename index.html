@@ -234,28 +234,33 @@
         }
 
 async function vote(id, currentVotes) {
-    // Vérifier si l'utilisateur a déjà voté dans ce navigateur
+    // 1. Bloquer si déjà voté sur ce navigateur
     if (localStorage.getItem('voted_' + id)) {
         return alert("Vous avez déjà voté pour cet emplacement !");
     }
 
-    // On appelle la fonction SQL que l'on vient de créer
+    // 2. Appeler la fonction SQL sécurisée
     const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
 
     if (!error) {
-        // On enregistre le vote localement pour bloquer les votes multiples
+        // 3. Enregistrer le vote localement
         localStorage.setItem('voted_' + id, 'true');
         
-        // On met à jour l'affichage immédiatement sans recharger
-        const voteElement = document.getElementById('v-' + id);
-        if (voteElement) {
-            voteElement.innerText = parseInt(voteElement.innerText) + 1;
+        // 4. Mettre à jour l'affichage immédiatement
+        const voteEl = document.getElementById('v-' + id);
+        if (voteEl) {
+            const nouveauScore = parseInt(voteEl.innerText) + 1;
+            voteEl.innerText = nouveauScore;
         }
-        
+
+        // 5. Désactiver le bouton visuellement
+        const btnEl = document.getElementById('btn-' + id);
+        if (btnEl) { btnEl.disabled = true; btnEl.innerText = "Voté !"; }
+
         alert("Merci ! Votre vote a été pris en compte.");
     } else {
-        console.error("Erreur de vote:", error);
-        alert("Désolé, une erreur est survenue lors du vote.");
+        console.error("Erreur vote:", error);
+        alert("Une erreur technique est survenue.");
     }
 }
 
