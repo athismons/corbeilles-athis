@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Athis-Mons | Corbeilles de rue</title>
     
-    <!-- Bibliothèques -->
+    <!-- Leaflet & Plugins -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
@@ -18,53 +18,35 @@
         :root { --primary: #0056b3; --accent: #28a745; --header-h: 90px; }
         body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #f4f4f4; }
 
-        /* HEADER : LOGO GAUCHE + TITRE CENTRÉ */
+        /* HEADER : LOGO GAUCHE | TITRE CENTRÉ | AIDE DROITE */
         header {
             height: var(--header-h); background: white; display: flex; align-items: center; 
             justify-content: center; padding: 0 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
             position: relative; z-index: 1001;
         }
         .header-logo { position: absolute; left: 15px; height: 65px; width: auto; }
+        .help-btn { position: absolute; right: 15px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-weight: bold; cursor: pointer; font-size: 1.3rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
         
         .header-title-container { text-align: center; max-width: 60%; }
         .fancy-title {
-            font-size: 1.3rem; font-weight: 900;
-            background: linear-gradient(45deg, #003366, #0056b3);
+            font-size: 1.3rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             text-transform: uppercase; letter-spacing: -0.5px; margin: 0; line-height: 1.1;
         }
 
         #map { height: calc(100vh - var(--header-h)); width: 100%; }
 
-        /* BOUTON AIDE */
-        .help-btn { 
-            position: absolute; right: 15px;
-            background: var(--primary); color: white; border: none; border-radius: 50%; 
-            width: 40px; height: 40px; font-weight: bold; cursor: pointer; font-size: 1.3rem;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-
         /* MODALE */
-        #help-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
-        }
+        #help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
         .modal-content { background: white; padding: 25px; border-radius: 15px; max-width: 500px; max-height: 85vh; overflow-y: auto; }
 
-        /* FORMULAIRE & POPUPS */
+        /* POPUPS & FORM */
         .popup-form { min-width: 260px; font-size: 13px; }
-        .popup-form input, .popup-form textarea { 
-            width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; 
-            border: 1px solid #ccc; border-radius: 6px; font-size: 14px;
-        }
+        .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
         .info-rgpd { background: #f0f7ff; padding: 10px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; color: #004085; line-height: 1.3; }
         .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
-
-        /* AJUSTEMENTS MOBILE CONTROLES */
-        .leaflet-top.leaflet-right { top: 10px; right: 10px; }
-        .leaflet-control-layers { margin-top: 50px !important; } /* Évite le bouton zoom */
 
         @media (max-width: 600px) {
             .fancy-title { font-size: 0.9rem; }
@@ -94,21 +76,23 @@
                 Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre et un cadre de vie plus agréable au quotidien.
             </p>
             <ol>
-                <li><strong>Proposez :</strong> Cliquez n'importe où à l'intérieur des limites bleues de la ville.</li>
-                <li><strong>Détaillez :</strong> Décrivez précisément l'endroit et pourquoi une corbeille est nécessaire.</li>
+                <li><strong>Proposez :</strong> Cliquez à l'intérieur des limites bleues de la ville.</li>
+                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
             <hr>
-            <h4>Utilisation des cookies et données</h4>
+            <h4>Utilisation des données & Cookies</h4>
             <p style="font-size: 12px; color: #666;">
-                - <strong>LocalStorage :</strong> Nous mémorisons vos nom, email et téléphone sur cet appareil pour vous éviter de les ressaisir.<br>
-                - <strong>Données personnelles :</strong> Seuls les champs "Description et Raison" sont publics. Vos coordonnées sont réservées aux services municipaux.
+                - <strong>LocalStorage :</strong> Utilisé pour mémoriser vos coordonnées sur cet appareil.<br>
+                - <strong>LocalStorage (voted_ID) :</strong> Utilisé pour limiter les votes multiples par personne.<br>
+                - <strong>Confidentialité :</strong> Seule la description est publique. Vos coordonnées sont réservées aux services municipaux.
             </p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
 
     <script>
+        // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -120,30 +104,22 @@
             className: "", iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
         });
 
-        // ZOOM : maxNativeZoom: 19 pour éviter les tuiles grises
+        // --- CARTE ---
         const map = L.map('map', { zoomControl: false, maxZoom: 21 }).setView([48.707, 2.387], 14);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-            attribution: '© OSM',
-            maxNativeZoom: 19,
-            maxZoom: 21
-        }).addTo(map);
-
-        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { 
-            attribution: 'Esri Satellite',
-            maxNativeZoom: 19,
-            maxZoom: 21
-        });
+        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM', maxNativeZoom: 19, maxZoom: 21 }).addTo(map);
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri Satellite', maxNativeZoom: 19, maxZoom: 21 });
 
         L.control.layers({ "Plan": plan, "Aérien": satellite }, null, { position: 'topright' }).addTo(map);
 
         const markersCluster = L.markerClusterGroup();
         map.addLayer(markersCluster);
 
-        L.geoJSON(athisGeoJSON, {
-            style: { color: "#0056b3", weight: 3, fillOpacity: 0.05, dashArray: "5, 10" }
-        }).addTo(map);
+        L.geoJSON(athisGeoJSON, { style: { color: "#0056b3", weight: 3, fillOpacity: 0.05, dashArray: "5, 10" } }).addTo(map);
+
+        // Mémoire locale des marqueurs pour mise à jour sans reload
+        let allMarkers = {};
 
         function isPointInPoly(pt, poly) {
             let x = pt.lng, y = pt.lat;
@@ -163,35 +139,63 @@
             m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
         }
 
+        // Fonction pour générer le contenu de la bulle
+        function getPopupHTML(p) {
+            const hasVoted = localStorage.getItem('voted_' + p.id);
+            return `
+                <div class="popup-form">
+                    <p style="font-weight:bold; margin: 0 0 10px 0; font-size:14px;">"${p.raison}"</p>
+                    <div style="text-align:center;">
+                        👍 <b id="v-${p.id}">${p.votes}</b> votes<br>
+                        <button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} 
+                                onclick="vote(${p.id}, ${p.votes})">
+                            ${hasVoted ? 'Voté !' : 'Voter'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Ajouter ou mettre à jour un marqueur sur la carte
+        function upsertMarker(p) {
+            if (allMarkers[p.id]) {
+                // Mise à jour de la donnée et de la popup
+                allMarkers[p.id].data = p;
+                allMarkers[p.id].setPopupContent(getPopupHTML(p));
+            } else {
+                // Création
+                const m = L.marker([p.lat, p.lng], { icon: binIcon });
+                m.data = p;
+                m.bindPopup(getPopupHTML(p));
+                markersCluster.addLayer(m);
+                allMarkers[p.id] = m;
+            }
+        }
+
         async function loadMarkers() {
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
-                markersCluster.clearLayers();
-                data.forEach(p => {
-                    const m = L.marker([p.lat, p.lng], { icon: binIcon });
-                    m.bindPopup(`
-                        <div class="popup-form">
-                            <p style="font-weight:bold; margin: 0 0 10px 0; font-size:14px;">"${p.raison}"</p>
-                            <div style="text-align:center;">
-                                👍 <b id="v-${p.id}">${p.votes}</b> votes<br>
-                                <button id="btn-${p.id}" class="btn-vote" ${localStorage.getItem('voted_'+p.id) ? 'disabled' : ''} 
-                                        onclick="vote(${p.id}, ${p.votes})">
-                                    ${localStorage.getItem('voted_'+p.id) ? 'Voté !' : 'Voter'}
-                                </button>
-                            </div>
-                        </div>
-                    `);
-                    markersCluster.addLayer(m);
-                });
+                data.forEach(p => upsertMarker(p));
             }
         }
+
+        // --- REALTIME : Mise à jour automatique ---
+        supabaseClient
+            .channel('schema-db-changes')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
+                // Si c'est un nouvel insert ou un update (vote)
+                // Note: La vue ne supporte pas le realtime direct, on écoute la table et on simule l'objet public
+                const p = payload.new;
+                const publicObj = { id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at };
+                upsertMarker(publicObj);
+            })
+            .subscribe();
 
         map.on('click', function(e) {
             if (!isPointInPoly(e.latlng, athisGeoJSON)) {
                 alert("📍 Veuillez cliquer à l'intérieur d'Athis-Mons.");
                 return;
             }
-
             const savedNom = localStorage.getItem('user_nom') || '';
             const savedEmail = localStorage.getItem('user_email') || '';
             const savedTel = localStorage.getItem('user_tel') || '';
@@ -234,8 +238,11 @@
             }]);
 
             if (!error) {
-                alert("Enregistré !");
-                location.reload();
+                alert("Merci ! Votre proposition a été enregistrée.");
+                map.closePopup();
+                // Le Realtime s'occupera d'afficher le marqueur sans recharger
+            } else {
+                alert("Erreur lors de l'envoi.");
             }
         }
 
@@ -247,14 +254,17 @@
             if(!error) {
                 localStorage.setItem('voted_'+id, 'true');
                 
-                // MISE A JOUR REACTIVE SANS RECHARGER
-                const countEl = document.getElementById('v-' + id);
-                if(countEl) countEl.innerText = parseInt(countEl.innerText) + 1;
-                
-                const btnEl = document.getElementById('btn-' + id);
-                if(btnEl) {
-                    btnEl.disabled = true;
-                    btnEl.innerText = "Voté !";
+                // On met à jour l'objet local immédiatement pour la persistance bulle
+                const m = allMarkers[id];
+                if(m) {
+                    m.data.votes += 1;
+                    m.setPopupContent(getPopupHTML(m.data));
+                    
+                    // On force l'ouverture pour voir le changement (ou on laisse l'utilisateur le voir)
+                    const countEl = document.getElementById('v-' + id);
+                    if(countEl) countEl.innerText = m.data.votes;
+                    const btnEl = document.getElementById('btn-' + id);
+                    if(btnEl) { btnEl.disabled = true; btnEl.innerText = "Voté !"; }
                 }
             }
         }
