@@ -87,7 +87,7 @@
         // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co'; 
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';  
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // --- ICONE PERSONNALISÉE ---
         const binIcon = L.divIcon({
@@ -113,7 +113,7 @@
 
         // --- CHARGEMENT DES MARQUEURS ---
         async function loadMarkers() {
-            const { data } = await supabase.from('propositions_publiques').select('*');
+            const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
                 markers.clearLayers();
                 data.forEach(p => {
@@ -172,7 +172,7 @@
             if(!fields.nom || !fields.prenom || !fields.email || !fields.telephone || !fields.raison) return alert("Tous les champs sont requis.");
             if(!fields.consentement_rgpd) return alert("Le consentement RGPD est obligatoire.");
 
-            const { error } = await supabase.from('propositions').insert([{ lat, lng, ...fields }]);
+            const { error } = await supabaseClient.from('propositions').insert([{ lat, lng, ...fields }]);
 
             if (!error) {
                 alert("Merci ! Votre proposition est enregistrée.");
@@ -186,7 +186,7 @@
         async function vote(id, currentVotes) {
             if(localStorage.getItem('voted-' + id)) return alert("Vous avez déjà voté.");
             
-            const { error } = await supabase.from('propositions').update({ votes: currentVotes + 1 }).eq('id', id);
+            const { error } = await supabaseClient.from('propositions').update({ votes: currentVotes + 1 }).eq('id', id);
             
             if (!error) {
                 localStorage.setItem('voted-' + id, 'true');
