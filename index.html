@@ -65,7 +65,7 @@
     <header>
         <img src="https://upload.wikimedia.org/wikipedia/fr/4/41/Logo_Athis-Mons.svg" alt="Athis-Mons" class="header-logo">
         <div class="header-title-container">
-            <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>Dites-nous où !</h1>
+            <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>Dites-nous où</h1>
         </div>
         <button class="help-btn" onclick="toggleHelp()">?</button>
     </header>
@@ -260,4 +260,20 @@
             const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
 
             if(!error) {
-                local
+                localStorage.setItem('voted_'+id, 'true');
+                if(allMarkers[id]) {
+                    allMarkers[id].data.votes += 1;
+                    allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data));
+                    
+                    const countEl = document.getElementById('v-' + id);
+                    if(countEl) countEl.innerText = allMarkers[id].data.votes;
+                    const btnEl = document.getElementById('btn-' + id);
+                    if(btnEl) { btnEl.disabled = true; btnEl.innerText = "Voté !"; }
+                }
+            }
+        }
+
+        loadMarkers();
+    </script>
+</body>
+</html>
