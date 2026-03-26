@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Athis-Mons | Corbeilles de rue</title>
+    
+    <!-- Bibliothèques : Leaflet, Supabase et MarkerCluster -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        :root { --primary: #0056b3; --accent: #28a745; --header-h: 70px; }
+        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #f4f4f4; }
+
+        header {
+            height: var(--header-h); background: white; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative; z-index: 1001;
+        }
+        .logo-area { display: flex; align-items: center; gap: 10px; }
+        .logo-area img { height: 45px; }
+        h1 { font-size: 1rem; color: var(--primary); margin: 0; line-height: 1.2; }
+
+        #map { height: calc(100vh - var(--header-h)); width: 100%; }
+
+        /* Bouton Aide */
+        .help-btn { background: #eee; border: none; border-radius: 50%; width: 35px; height: 35px; font-weight: bold; cursor: pointer; }
+
+        /* Modale Aide */
+        #help-modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; padding: 20px;
+        }
+        .modal-content { background: white; padding: 25px; border-radius: 12px; max-width: 450px; max-height: 80vh; overflow-y: auto; position: relative; }
+
+        /* Formulaires Popups */
+        .popup-form { min-width: 240px; font-size: 13px; }
+        .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; }
+        .rgpd-box { display: flex; gap: 8px; font-size: 11px; color: #555; margin-bottom: 10px; align-items: flex-start; }
+        .rgpd-box input { width: auto; margin: 0; }
+        
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        .vote-box { text-align: center; background: #f9f9f9; padding: 10px; border-radius: 8px; margin-top: 10px; border: 1px solid #eee; }
+        .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; }
+        .btn-vote:disabled { background: #ccc; }
+
+        @media (max-width: 600px) { h1 { font-size: 0.85rem; } .logo-area img { height: 35px; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-area">
+            <img src="https://upload.wikimedia.org/wikipedia/fr/4/41/Logo_Athis-Mons.svg" alt="Athis-Mons">
+            <h1>Nouvelle corbeille de rue :<br>Dites-nous où !</h1>
+        </div>
+        <button class="help-btn" onclick="toggleHelp()">?</button>
+    </header>
+
+    <div id="map"></div>
+
+    <!-- Modale Aide -->
+    <div id="help-modal" onclick="toggleHelp()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <h2 style="color:var(--primary); margin-top:0;">Comment ça marche ?</h2>
+            <p>Participez à la propreté d'Athis-Mons en suggérant des lieux nécessitant une corbeille.</p>
+            <ol>
+                <li><strong>Cliquez sur la carte</strong> à l'endroit précis de votre choix.</li>
+                <li>Remplissez le formulaire (vos coordonnées restent privées).</li>
+                <li><strong>Votez</strong> pour les propositions de vos voisins.</li>
+            </ol>
+            <div style="background:#f0f7ff; padding:10px; border-radius:8px; font-size:12px;">
+                <strong>RGPD :</strong> Vos données (nom, email, tel) sont uniquement traitées par les services de la mairie pour valider la demande. Elles ne sont jamais publiées.
+            </div>
+            <br>
+            <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURATION SUPABASE ---
+        const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co'; // À REMPLACER
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM
+';     // À REMPLACER
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- ICONE PERSONNALISÉE ---
+        const binIcon = L.divIcon({
+            html: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#0056b3"/><path d="M8 9h8m-7 0v8a2 2 0 002 2h2a2 2 0 002-2V9m-5 0V7a2 2 0 012-2h0a2 2 0 012 2v2" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>`,
+            className: "", iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
+        });
+
+        // --- INITIALISATION CARTE ---
+        const map = L.map('map', { zoomControl: false }).setView([48.707, 2.387], 15);
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        const markers = L.markerClusterGroup(); // CLUSTERING
+        map.addLayer(markers);
+
+        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM' }).addTo(map);
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri Satellite' });
+        L.control.layers({ "Plan": plan, "Vue Satellite": satellite }, null, { position: 'bottomleft' }).addTo(map);
+
+        function toggleHelp() {
+            const m = document.getElementById('help-modal');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // --- CHARGEMENT DES MARQUEURS ---
+        async function loadMarkers() {
+            const { data } = await supabase.from('propositions_publiques').select('*');
+            if (data) {
+                markers.clearLayers();
+                data.forEach(p => {
+                    const dateStr = new Date(p.created_at).toLocaleDateString('fr-FR');
+                    const m = L.marker([p.lat, p.lng], { icon: binIcon });
+                    
+                    const content = `
+                        <div class="popup-form">
+                            <small>Le ${dateStr}</small>
+                            <p style="font-weight:bold; margin: 8px 0; font-size:14px;">"${p.raison}"</p>
+                            <div class="vote-box">
+                                <span style="font-size:16px;">👍 <b id="v-${p.id}">${p.votes}</b> votes</span><br>
+                                <button id="btn-${p.id}" class="btn-vote" onclick="vote(${p.id}, ${p.votes})">Voter</button>
+                            </div>
+                        </div>
+                    `;
+                    m.bindPopup(content);
+                    markers.addLayer(m);
+                });
+            }
+        }
+
+        // --- CLIC CARTE : FORMULAIRE ---
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            const form = `
+                <div class="popup-form">
+                    <h3 style="margin:0 0 10px 0; color:var(--primary);">Suggérer ce lieu</h3>
+                    <input type="text" id="f_nom" placeholder="Nom">
+                    <input type="text" id="f_prenom" placeholder="Prénom">
+                    <input type="email" id="f_email" placeholder="Email">
+                    <input type="tel" id="f_tel" placeholder="Téléphone">
+                    <textarea id="f_raison" placeholder="Justifiez votre choix (ex: proximité école...)" rows="3"></textarea>
+                    <div class="rgpd-box">
+                        <input type="checkbox" id="f_rgpd">
+                        <label for="f_rgpd">J'accepte que la mairie traite mes données pour cette demande.</label>
+                    </div>
+                    <button class="btn-submit" onclick="submitData(${lat}, ${lng})">Envoyer</button>
+                </div>
+            `;
+            L.popup().setLatLng(e.latlng).setContent(form).openOn(map);
+        });
+
+        // --- ENVOI DES DONNÉES ---
+        async function submitData(lat, lng) {
+            const fields = {
+                nom: document.getElementById('f_nom').value,
+                prenom: document.getElementById('f_prenom').value,
+                email: document.getElementById('f_email').value,
+                telephone: document.getElementById('f_tel').value,
+                raison: document.getElementById('f_raison').value,
+                consentement_rgpd: document.getElementById('f_rgpd').checked
+            };
+
+            if(!fields.nom || !fields.prenom || !fields.email || !fields.telephone || !fields.raison) return alert("Tous les champs sont requis.");
+            if(!fields.consentement_rgpd) return alert("Le consentement RGPD est obligatoire.");
+
+            const { error } = await supabase.from('propositions').insert([{ lat, lng, ...fields }]);
+
+            if (!error) {
+                alert("Merci ! Votre proposition est enregistrée.");
+                location.reload();
+            } else {
+                alert("Erreur lors de l'envoi.");
+            }
+        }
+
+        // --- SYSTÈME DE VOTE ---
+        async function vote(id, currentVotes) {
+            if(localStorage.getItem('voted-' + id)) return alert("Vous avez déjà voté.");
+            
+            const { error } = await supabase.from('propositions').update({ votes: currentVotes + 1 }).eq('id', id);
+            
+            if (!error) {
+                localStorage.setItem('voted-' + id, 'true');
+                alert("Vote pris en compte !");
+                location.reload();
+            }
+        }
+
+        loadMarkers();
+    </script>
+</body>
+</html>
