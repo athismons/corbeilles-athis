@@ -5,16 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Athis-Mons | Corbeilles de rue</title>
     
-    <!-- 1. LEAFLET CSS -->
+    <!-- Leaflet & Plugins -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    
-    <!-- 2. MARKER CLUSTER CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
-    <!-- 3. SCRIPTS (ORDRE CRUCIAL) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <!-- Correction de l'URL ici : leaflet.markercluster.js au lieu de MarkerCluster.js -->
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
@@ -32,38 +28,24 @@
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
+        /* HEADER */
         header {
-            height: var(--header-h);
-            background: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 15px;
-            box-shadow: var(--shadow);
-            position: relative;
-            z-index: 1001;
+            height: var(--header-h); background: white; display: flex; align-items: center; 
+            justify-content: center; padding: 0 15px; box-shadow: var(--shadow);
+            position: relative; z-index: 1001;
         }
-
-        .header-logo { position: absolute; left: 15px; height: 65px; width: auto; }
-        
+        .header-logo { position: absolute; left: 15px; height: 60px; width: auto; }
         .header-title-container { text-align: center; max-width: 60%; }
         .fancy-title {
-            font-size: 1.25rem;
-            font-weight: 900;
-            background: linear-gradient(45deg, #003366, #0056b3);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-            letter-spacing: -0.2px;
-            margin: 0;
-            line-height: 1.1;
+            font-size: 1.2rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; letter-spacing: -0.2px; margin: 0; line-height: 1.1;
         }
 
         .help-btn { 
-            position: absolute; right: 15px;
-            background: var(--primary); color: white; border: none; border-radius: 50%; 
-            width: 42px; height: 42px; font-weight: bold; cursor: pointer; font-size: 1.3rem;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: absolute; right: 15px; background: var(--primary); color: white; border: none; 
+            border-radius: 50%; width: 42px; height: 42px; font-weight: bold; cursor: pointer; 
+            font-size: 1.3rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); transition: all 0.3s;
         }
 
         @keyframes attention {
@@ -75,29 +57,32 @@
 
         #map { height: calc(100dvh - var(--header-h)); width: 100%; background: #f0f0f0; }
 
+        /* MODALE AIDE */
         #help-modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
             backdrop-filter: blur(4px);
         }
         .modal-content { 
-            background: white; padding: 25px; border-radius: 20px; 
-            width: 90%; max-width: 450px; box-sizing: border-box; 
-            max-height: 85vh; overflow-y: auto; animation: slideUp 0.4s ease-out;
+            background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; 
+            box-sizing: border-box; max-height: 85vh; overflow-y: auto; animation: slideUp 0.4s ease-out;
         }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
+        /* TOAST NOTIFICATIONS */
         .toast {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.85); color: white; padding: 15px 30px;
-            border-radius: 50px; z-index: 3000; font-weight: bold; text-align: center;
-            pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s;
-            box-shadow: var(--shadow); min-width: 250px;
+            background: rgba(0, 0, 0, 0.9); color: white; padding: 20px 30px;
+            border-radius: 20px; z-index: 3000; font-weight: 500; text-align: center;
+            pointer-events: none; opacity: 0; transition: opacity 0.5s, transform 0.5s;
+            box-shadow: var(--shadow); width: 80%; max-width: 400px; line-height: 1.4;
         }
-        .toast.show { opacity: 1; transform: translate(-50%, -60%); }
+        .toast.show { opacity: 1; transform: translate(-50%, -55%); }
         .toast.error { background: #dc3545; }
         .toast.success { background: var(--accent); }
+        .toast.info { background: #343a40; border: 1px solid #555; }
 
+        /* VOTE ANIMATION */
         @keyframes votePop {
             0% { transform: scale(1); }
             50% { transform: scale(1.4); color: #ffd700; }
@@ -117,13 +102,18 @@
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
 
+        .closed-badge { 
+            display: inline-block; margin-top: 10px; padding: 5px 12px; 
+            background: #f8f9fa; border: 1px solid #ddd; border-radius: 15px; 
+            font-size: 11px; color: #666; font-weight: bold;
+        }
+
         .leaflet-top.leaflet-right { top: 10px; right: 10px; }
         .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; }
 
         @media (max-width: 600px) {
             .fancy-title { font-size: 1rem; }
             .header-logo { height: 45px; left: 10px; }
-            .help-btn { right: 10px; width: 38px; height: 38px; }
             header { height: 75px; }
             #map { height: calc(100dvh - 75px); }
         }
@@ -132,7 +122,6 @@
 <body>
 
     <header>
-        <!-- Logo local -->
         <img src="./Logo-ville-dAthis-Mons.jpg" alt="Ville d'Athis-Mons" class="header-logo">
         <div class="header-title-container">
             <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>dites-nous où !</h1>
@@ -165,6 +154,11 @@
     </div>
 
     <script>
+        // ==========================================
+        // CONFIGURATION & CLÔTURE
+        // ==========================================
+        const IS_CLOSED = false; // Passez à true pour clôturer les propositions et votes
+
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -172,11 +166,27 @@
         const athisGeoJSON = {"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[2.35629,48.705582],[2.3537966981992,48.7017308096213],[2.35493116585098,48.7012943642373],[2.35711197320692,48.7006256919349],[2.35856037275802,48.7001173639781],[2.36173785063673,48.6989403970146],[2.36270860912442,48.6986475763509],[2.36715548542761,48.6975288243865],[2.36816196492778,48.6972395345244],[2.36871402802375,48.6970431546675],[2.36899539802559,48.6968971103144],[2.36912177823309,48.6968146030171],[2.36927,48.696709],[2.37154907279222,48.6980265316875],[2.37180601522367,48.6981338909087],[2.37181839871256,48.6981980168507],[2.37192940022668,48.6981795845058],[2.37486949695278,48.697629714176],[2.37494609937397,48.6976131468868],[2.37511874853466,48.6975761586323],[2.3755295907101,48.697466509724],[2.37704,48.697102],[2.37721532273549,48.6973550972289],[2.37762605640344,48.6972481733831],[2.37756938838357,48.6971217722576],[2.37807163017602,48.6970047287506],[2.37837008264096,48.6969420400105],[2.37857410512509,48.6968822675006],[2.37878543499649,48.6968336813774],[2.37900113446864,48.6967770850777],[2.37917761404269,48.6967316539352],[2.37909517031193,48.6965778743351],[2.37976232019203,48.6964282510587],[2.37968766614472,48.6962588480711],[2.37957277423776,48.696010889363],[2.38023266746714,48.6959015205124],[2.38053057572602,48.6958582706052],[2.38134812551928,48.6956880226081],[2.38111559486765,48.6949159577917],[2.38089877585095,48.6942224410326],[2.38083044013428,48.6940001051837],[2.38120082833503,48.6935833082113],[2.38132177263956,48.6934136308113],[2.38137830127128,48.6932539135159],[2.3813954716679,48.6931012124603],[2.3813954579952,48.6929603110422],[2.38137073807019,48.6927213009521],[2.38118322700026,48.6927570276295],[2.38111207869634,48.6926355517085],[2.38160013503776,48.6925419586276],[2.38144350408769,48.6922203177739],[2.38210471159058,48.6920154696925],[2.38467,48.692291],[2.38708,48.692719],[2.38751,48.69265],[2.3889,48.692181],[2.38995,48.691929],[2.39359,48.6954],[2.39797,48.69931],[2.39972,48.70108],[2.40207,48.704632],[2.40412,48.709831],[2.4053,48.712318],[2.40681,48.713779],[2.4086,48.714851],[2.41458591298632,48.7176965003153],[2.4132055885598,48.718683218561],[2.4139825542722,48.7192528120044],[2.4149752935348,48.7200691487739],[2.41570801922728,48.7208794806908],[2.41512382058972,48.7209736799757],[2.41449,48.721191],[2.41419,48.721298],[2.41391244334364,48.7213643443789],[2.41301,48.721619],[2.4126,48.721668],[2.41235645080079,48.7212668479751],[2.41150834800564,48.7215424113495],[2.41151768203718,48.7216515785369],[2.41071687930554,48.7219825854605],[2.41101967593379,48.7224425318665],[2.41115784223237,48.7227062525742],[2.41120298261812,48.7228798831102],[2.41120547660704,48.7233544520321],[2.41116391301513,48.7239858046261],[2.41105903338385,48.7248930672382],[2.41097864798789,48.7253438017861],[2.41086936868638,48.7261160981334],[2.41048644768288,48.7260527121397],[2.41013273582022,48.7260367303373],[2.40862013153333,48.7259566853231],[2.40858589634767,48.7260518735062],[2.40731957876329,48.7259702375178],[2.40187,48.726509],[2.40119,48.724419],[2.39926,48.724609],[2.3975,48.720982],[2.39133,48.7225],[2.3896,48.720531],[2.38857,48.72094],[2.38805,48.720299],[2.38626,48.720798],[2.38502,48.718712],[2.3827,48.71946],[2.37726,48.72049],[2.37627,48.719231],[2.37073273961958,48.7201230638816],[2.37086,48.717838],[2.36828,48.71841],[2.36797078129887,48.7178689511408],[2.36778536195183,48.7175609639982],[2.36745876427501,48.7170032940265],[2.36751596904487,48.7169839728948],[2.36744929279447,48.7161346511957],[2.3674832161945,48.715604043731],[2.36747407187354,48.7151556039889],[2.3674623046196,48.714603863121],[2.36745700914415,48.7145161671954],[2.36746103824516,48.7144449144439],[2.36744923638041,48.713976295358],[2.36744924233955,48.7139595769841],[2.36777609886789,48.7139361157741],[2.36790808489068,48.7139396563048],[2.36791075403415,48.7139255846785],[2.36840854126221,48.7138825669923],[2.36882562610183,48.7138439335921],[2.36895717454175,48.7138342794464],[2.36974467246792,48.7137693151444],[2.37011030860819,48.7137350652088],[2.37043835134284,48.7137052068579],[2.37057626330985,48.7136981933412],[2.37086290061338,48.7136955987042],[2.3711359375542,48.7136665945559],[2.37137789958601,48.7089092794972],[2.37143,48.707611],[2.36783,48.707722],[2.36722,48.705769],[2.35629,48.705582]]]}}]}
 
         const binIcon = L.divIcon({
-            html: `<svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="12" fill="#0056b3"/><path d="M8 9h8m-7 0v8a2 2 0 002 2h2a2 2 0 002-2V9m-5 0V7a2 2 0 012-2h0a2 2 0 012 2v2" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>`,
-            className: "", iconSize: [30, 30], iconAnchor: [15, 15], popupAnchor: [0, -15]
+            html: `
+            <svg width="35" height="35" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="512" cy="512" r="480" fill="#0055A0" stroke="white" stroke-width="20" />
+                <g transform="translate(136, 136) scale(0.735)" fill="#FFFFFF">
+                    <path d="M831.24 280.772c5.657 0 10.24-4.583 10.24-10.24v-83.528c0-5.657-4.583-10.24-10.24-10.24H194.558a10.238 10.238 0 00-10.24 10.24v83.528c0 5.657 4.583 10.24 10.24 10.24H831.24zm0 40.96H194.558c-28.278 0-51.2-22.922-51.2-51.2v-83.528c0-28.278 22.922-51.2 51.2-51.2H831.24c28.278 0 51.2 22.922 51.2 51.2v83.528c0 28.278-22.922 51.2-51.2 51.2z" />
+                    <path d="M806.809 304.688l-58.245 666.45c-.544 6.246-6.714 11.9-12.99 11.9H290.226c-6.276 0-12.447-5.654-12.99-11.893L218.99 304.688c-.985-11.268-10.917-19.604-22.185-18.619s-19.604 10.917-18.619 22.185l58.245 666.45c2.385 27.401 26.278 49.294 53.795 49.294h445.348c27.517 0 51.41-21.893 53.796-49.301l58.244-666.443c.985-11.268-7.351-21.201-18.619-22.185s-21.201 7.351-22.185 18.619zM422.02 155.082V51.3c0-5.726 4.601-10.342 10.24-10.342h161.28c5.639 0 10.24 4.617 10.24 10.342v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V51.3c0-28.316-22.908-51.302-51.2-51.302H432.26c-28.292 0-51.2 22.987-51.2 51.302v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48z" />
+                    <path d="M496.004 410.821v460.964c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V410.821c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48zm-192.435 1.767l39.936 460.964c.976 11.269 10.903 19.612 22.171 18.636s19.612-10.903 18.636-22.171l-39.936-460.964c-.976-11.269-10.903-19.612-22.171-18.636s-19.612 10.903-18.636 22.171zm377.856-3.535l-39.936 460.964c-.976 11.269 7.367 21.195 18.636 22.171s21.195-7.367 22.171-18.636l39.936-460.964c.976-11.269-7.367-21.195-18.636-22.171s-21.195 7.367-22.171 18.636z" />
+                </g>
+            </svg>`,
+            className: "", iconSize: [35, 35], iconAnchor: [17, 17], popupAnchor: [0, -17]
         });
 
-        // --- CARTE ---
+        // --- UI UTILS ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => toast.classList.remove('show'), 4000);
+        }
+
+        // --- INITIALISATION CARTE ---
         const map = L.map('map', { zoomControl: false, maxZoom: 21 }).setView([48.707, 2.387], 14);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
@@ -196,45 +206,22 @@
 
         let allMarkers = {};
 
-        // --- UI UTILS ---
-        function showToast(message, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.innerText = message;
-            toast.className = `toast show ${type === 'error' ? 'error' : 'success'}`;
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-
-        function toggleHelp() {
-            const m = document.getElementById('help-modal');
-            const btn = document.getElementById('btn-help');
-            btn.classList.remove('pulse-btn');
-            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-        }
-
-        function isPointInPoly(pt, poly) {
-            let x = pt.lng, y = pt.lat;
-            let inside = false;
-            let vs = poly.features[0].geometry.coordinates[0];
-            for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                let xi = vs[i][0], yi = vs[i][1];
-                let xj = vs[j][0], yj = vs[j][1];
-                let intersect = ((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-                if (intersect) inside = !inside;
-            }
-            return inside;
-        }
-
         function getPopupHTML(p) {
             const hasVoted = localStorage.getItem('voted_' + p.id);
+            
+            // Si clos, on masque le bouton de vote et on met un badge
+            const voteAction = IS_CLOSED ? 
+                `<div class="closed-badge">Analyse en cours</div>` : 
+                `<button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} onclick="vote(${p.id}, ${p.votes})">
+                    ${hasVoted ? 'Voté !' : 'Voter'}
+                </button>`;
+
             return `
                 <div class="popup-form">
                     <p style="font-weight:bold; margin: 0 0 10px 0; font-size:14px; line-height:1.4;">"${p.raison}"</p>
                     <div style="text-align:center; padding-top:5px;">
                         <span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>
-                        <button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} 
-                                onclick="vote(${p.id}, ${p.votes})">
-                            ${hasVoted ? 'Voté !' : 'Voter'}
-                        </button>
+                        ${voteAction}
                     </div>
                 </div>
             `;
@@ -264,7 +251,6 @@
             if (data) data.forEach(p => upsertMarker(p));
         }
 
-        // --- REALTIME ---
         supabaseClient
             .channel('db-changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
@@ -273,12 +259,19 @@
             })
             .subscribe();
 
-        // --- EVENTS ---
+        // --- CLIC SUR CARTE ---
         map.on('click', function(e) {
+            // Si les propositions sont closes
+            if (IS_CLOSED) {
+                showToast("Les propositions sont closes.\nMerci pour votre participation. Les emplacements proposés sont en cours d’analyse par les services municipaux.", "info");
+                return;
+            }
+
             if (!isPointInPoly(e.latlng, athisGeoJSON)) {
                 showToast("Sélectionnez un emplacement dans les limites d'Athis-Mons.", "error");
                 return;
             }
+
             const savedNom = localStorage.getItem('user_nom') || '';
             const savedEmail = localStorage.getItem('user_email') || '';
             const savedTel = localStorage.getItem('user_tel') || '';
@@ -304,6 +297,8 @@
         });
 
         async function submitData(lat, lng) {
+            if (IS_CLOSED) return;
+
             const nom = document.getElementById('f_nom').value;
             const email = document.getElementById('f_email').value;
             const telephone = document.getElementById('f_tel').value;
@@ -335,6 +330,10 @@
         }
 
         async function vote(id, v) {
+            if(IS_CLOSED) {
+                showToast("Les votes sont terminés.", "info");
+                return;
+            }
             if(localStorage.getItem('voted_'+id)) return;
 
             const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
@@ -359,10 +358,18 @@
 
         loadMarkers();
 
+        // Arrêter l'animation du bouton ? après 8 secondes
         setTimeout(() => {
             const btn = document.getElementById('btn-help');
             if (btn) btn.classList.remove('pulse-btn');
         }, 8000);
+
+        function toggleHelp() {
+            const m = document.getElementById('help-modal');
+            const btn = document.getElementById('btn-help');
+            btn.classList.remove('pulse-btn');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
     </script>
 </body>
 </html>
