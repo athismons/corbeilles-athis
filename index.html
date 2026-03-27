@@ -11,92 +11,165 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root { --primary: #0056b3; --accent: #28a745; --header-h: 90px; }
-        body { margin: 0; font-family: 'Segoe UI', Arial, sans-serif; overflow: hidden; background: #f4f4f4; }
-
-        /* HEADER : LOGO GAUCHE | TITRE CENTRÉ | AIDE DROITE */
-        header {
-            height: var(--header-h); background: white; display: flex; align-items: center; 
-            justify-content: center; padding: 0 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            position: relative; z-index: 1001;
+        :root { 
+            --primary: #0056b3; 
+            --accent: #28a745; 
+            --header-h: 85px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
-        .header-logo { position: absolute; left: 15px; height: 65px; width: auto; }
-        .help-btn { position: absolute; right: 15px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-weight: bold; cursor: pointer; font-size: 1.3rem; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+
+        /* Fix scroll mobile & header stable */
+        html, body { 
+            height: 100%; width: 100%; margin: 0; padding: 0; 
+            overflow: hidden; position: fixed;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        /* HEADER */
+        header {
+            height: var(--header-h);
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 15px;
+            box-shadow: var(--shadow);
+            position: relative;
+            z-index: 1001;
+        }
+
+        .header-logo { position: absolute; left: 15px; height: 65px; width: auto; transition: transform 0.3s; }
         
         .header-title-container { text-align: center; max-width: 60%; }
         .fancy-title {
-            font-size: 1.4rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-            text-transform: uppercase; letter-spacing: -0.5px; margin: 0; line-height: 1.1;
+            font-size: 1.25rem;
+            font-weight: 900;
+            background: linear-gradient(45deg, #003366, #0056b3);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: -0.2px;
+            margin: 0;
+            line-height: 1.1;
         }
 
-        #map { height: calc(100vh - var(--header-h)); width: 100%; }
+        /* BOUTON AIDE ANIMÉ */
+        .help-btn { 
+            position: absolute; right: 15px;
+            background: var(--primary); color: white; border: none; border-radius: 50%; 
+            width: 42px; height: 42px; font-weight: bold; cursor: pointer; font-size: 1.3rem;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transition: all 0.3s;
+        }
 
-        /* MODALE AIDE */
-        #help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 2000; justify-content: center; align-items: center; padding: 20px; }
-        .modal-content { background: white; padding: 25px; border-radius: 15px; max-width: 500px; max-height: 85vh; overflow-y: auto; }
+        @keyframes attention {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0.7); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(0, 86, 179, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0); }
+        }
+        .pulse-btn { animation: attention 2s infinite ease-in-out; }
 
-        /* FORMULAIRE & POPUPS */
-        .popup-form { min-width: 260px; font-size: 13px; }
-        .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 8px; padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 14px; }
-        .info-rgpd { background: #f0f7ff; padding: 10px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; color: #004085; line-height: 1.3; }
-        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
-        .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
-        .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
+        /* CARTE */
+        #map { height: calc(100dvh - var(--header-h)); width: 100%; background: #f0f0f0; }
 
-        /* AJUSTEMENT CONTROLES CARTE */
+        /* MODALE RESPONSIVE */
+        #help-modal { 
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
+            backdrop-filter: blur(4px);
+        }
+        .modal-content { 
+            background: white; padding: 25px; border-radius: 20px; 
+            width: 90%; max-width: 450px; box-sizing: border-box; 
+            max-height: 85vh; overflow-y: auto; animation: slideUp 0.4s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+
+        /* TOAST NOTIFICATIONS */
+        .toast {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85); color: white; padding: 15px 30px;
+            border-radius: 50px; z-index: 3000; font-weight: bold; text-align: center;
+            pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s;
+            box-shadow: var(--shadow); min-width: 250px;
+        }
+        .toast.show { opacity: 1; transform: translate(-50%, -60%); }
+        .toast.error { background: #dc3545; }
+        .toast.success { background: var(--accent); }
+
+        /* VOTE ANIMATION */
+        @keyframes votePop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); color: #ffd700; }
+            100% { transform: scale(1); }
+        }
+        .vote-anim { animation: votePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* FORMULAIRE BULLS */
+        .popup-form { min-width: 240px; }
+        .popup-form input, .popup-form textarea { 
+            width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 12px; 
+            border: 1px solid #ddd; border-radius: 8px; font-size: 14px;
+        }
+        .btn-submit { 
+            background: var(--primary); color: white; border: none; padding: 12px; 
+            width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+        }
+        .btn-submit:active { background: #003366; }
+
+        /* LEAFLET UI */
         .leaflet-top.leaflet-right { top: 10px; right: 10px; }
-        .leaflet-control-layers { margin-top: 50px !important; }
+        .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; }
 
         @media (max-width: 600px) {
             .fancy-title { font-size: 1rem; }
-            .header-logo { height: 45px; }
+            .header-logo { height: 45px; left: 10px; }
+            .help-btn { right: 10px; width: 38px; height: 38px; }
             header { height: 75px; }
-            #map { height: calc(100vh - 75px); }
+            #map { height: calc(100dvh - 75px); }
         }
     </style>
 </head>
 <body>
 
     <header>
-        <img src="./Logo-ville-dAthis-Mons.jpg" alt="Athis-Mons" class="header-logo">
+        <img src="./Logo-ville-dAthis-Mons.jpg" alt="Ville d'Athis-Mons" class="header-logo">
         <div class="header-title-container">
-            <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>Dites-nous où !</h1>
+            <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>dites-nous où !</h1>
         </div>
-        <button class="help-btn" onclick="toggleHelp()">?</button>
+        <button id="btn-help" class="help-btn pulse-btn" onclick="toggleHelp()">?</button>
     </header>
 
     <div id="map"></div>
 
+    <div id="toast" class="toast"></div>
+
+    <!-- Modale Aide -->
     <div id="help-modal" onclick="toggleHelp()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--primary); margin-top:0;">Comment ça fonctionne ?</h2>
             <p>Bienvenue sur l'outil participatif de la <strong>Ville d'Athis-Mons</strong>.</p>
-            <p style="font-style: italic; color: #444; border-left: 3px solid var(--accent); padding-left: 10px; margin: 15px 0;">
+            <p style="font-style: italic; color: #444; border-left: 4px solid var(--accent); padding-left: 10px; margin: 15px 0;">
                 Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre et un cadre de vie plus agréable au quotidien.
             </p>
             <ol>
-                <li><strong>Proposez :</strong> Cliquez n'importe où à l'intérieur des limites bleues de la ville.</li>
-                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et pourquoi une corbeille est nécessaire.</li>
+                <li><strong>Proposez :</strong> Cliquez sur la carte à l'intérieur des limites de la ville.</li>
+                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
             <hr>
-            <h4>Utilisation des données & Cookies</h4>
             <p style="font-size: 12px; color: #666;">
-                - <strong>LocalStorage :</strong> Mémorise vos nom, email et téléphone sur cet appareil.<br>
-                - <strong>Votes :</strong> Un seul vote par emplacement est autorisé par utilisateur.<br>
-                - <strong>Confidentialité :</strong> Seule la description est publique. Vos coordonnées sont réservées aux services municipaux.
+                <strong>Données :</strong> Vos coordonnées sont mémorisées sur votre appareil (LocalStorage) pour faciliter vos dépôts. Seule la description est publique.
             </p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
 
     <script>
-        // --- CONFIGURATION SUPABASE ---
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';
         const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -112,23 +185,37 @@
         const map = L.map('map', { zoomControl: false, maxZoom: 21 }).setView([48.707, 2.387], 14);
         L.control.zoom({ position: 'topright' }).addTo(map);
 
-        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { 
-            attribution: '© OSM', maxNativeZoom: 19, maxZoom: 21 
-        }).addTo(map);
+        const plan = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OSM', maxNativeZoom: 19, maxZoom: 21 }).addTo(map);
+        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: 'Esri Satellite', maxNativeZoom: 19, maxZoom: 21 });
 
-        const satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { 
-            attribution: 'Esri Satellite', maxNativeZoom: 19, maxZoom: 21 
+        const layersControl = L.control.layers({ "Plan": plan, "Aérien": satellite }, null, { position: 'topright' }).addTo(map);
+
+        // Menu calque mobile
+        map.on('baselayerchange', () => {
+            if (window.innerWidth < 600) { setTimeout(() => layersControl.collapse(), 100); }
         });
-
-        L.control.layers({ "Plan": plan, "Aérien": satellite }, null, { position: 'topright' }).addTo(map);
 
         const markersCluster = L.markerClusterGroup();
         map.addLayer(markersCluster);
 
-        // Limites ville
         L.geoJSON(athisGeoJSON, { style: { color: "#0056b3", weight: 3, fillOpacity: 0.05, dashArray: "5, 10" } }).addTo(map);
 
-        let allMarkers = {}; // Stockage local des objets marqueurs
+        let allMarkers = {};
+
+        // --- UI UTILS ---
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.innerText = message;
+            toast.className = `toast show ${type === 'error' ? 'error' : 'success'}`;
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function toggleHelp() {
+            const m = document.getElementById('help-modal');
+            const btn = document.getElementById('btn-help');
+            btn.classList.remove('pulse-btn');
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
 
         function isPointInPoly(pt, poly) {
             let x = pt.lng, y = pt.lat;
@@ -143,18 +230,13 @@
             return inside;
         }
 
-        function toggleHelp() {
-            const m = document.getElementById('help-modal');
-            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
-        }
-
         function getPopupHTML(p) {
             const hasVoted = localStorage.getItem('voted_' + p.id);
             return `
                 <div class="popup-form">
-                    <p style="font-weight:bold; margin: 0 0 10px 0; font-size:14px;">"${p.raison}"</p>
-                    <div style="text-align:center;">
-                        👍 <b id="v-${p.id}">${p.votes}</b> votes<br>
+                    <p style="font-weight:bold; margin: 0 0 10px 0; font-size:14px; line-height:1.4;">"${p.raison}"</p>
+                    <div style="text-align:center; padding-top:5px;">
+                        <span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>
                         <button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} 
                                 onclick="vote(${p.id}, ${p.votes})">
                             ${hasVoted ? 'Voté !' : 'Voter'}
@@ -168,9 +250,12 @@
             if (allMarkers[p.id]) {
                 allMarkers[p.id].data = p;
                 allMarkers[p.id].setPopupContent(getPopupHTML(p));
-                // Mettre à jour le texte du compteur si la popup est ouverte
                 const countEl = document.getElementById('v-' + p.id);
-                if (countEl) countEl.innerText = p.votes;
+                if (countEl) {
+                    countEl.innerText = p.votes;
+                    countEl.classList.add('vote-anim');
+                    setTimeout(() => countEl.classList.remove('vote-anim'), 600);
+                }
             } else {
                 const m = L.marker([p.lat, p.lng], { icon: binIcon });
                 m.data = p;
@@ -182,24 +267,22 @@
 
         async function loadMarkers() {
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
-            if (data) {
-                data.forEach(p => upsertMarker(p));
-            }
+            if (data) data.forEach(p => upsertMarker(p));
         }
 
-        // Temps Réel
+        // --- REALTIME ---
         supabaseClient
             .channel('db-changes')
             .on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
                 const p = payload.new;
-                // On simule l'objet public pour la fonction upsert
                 upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
             })
             .subscribe();
 
+        // --- EVENTS ---
         map.on('click', function(e) {
             if (!isPointInPoly(e.latlng, athisGeoJSON)) {
-                alert("📍 Veuillez cliquer à l'intérieur d'Athis-Mons.");
+                showToast("Sélectionnez un emplacement dans les limites d'Athis-Mons.", "error");
                 return;
             }
             const savedNom = localStorage.getItem('user_nom') || '';
@@ -216,11 +299,11 @@
                     <div class="info-rgpd">
                         <b>Rappel :</b> Seule la description est publique. Vos coordonnées sont mémorisées localement.
                     </div>
-                    <div style="display:flex; align-items:center; gap:5px; margin-bottom:10px;">
-                        <input type="checkbox" id="f_rgpd" style="width:auto;">
-                        <label for="f_rgpd" style="font-size:11px;">J'accepte le traitement de ma demande.</label>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <input type="checkbox" id="f_rgpd" style="width:auto; margin:0;">
+                        <label for="f_rgpd" style="font-size:11px; cursor:pointer;">J'accepte le traitement de ma demande.</label>
                     </div>
-                    <button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Envoyer</button>
+                    <button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Soumettre la proposition</button>
                 </div>
             `;
             L.popup().setLatLng(e.latlng).setContent(form).openOn(map);
@@ -233,7 +316,10 @@
             const raison = document.getElementById('f_raison').value;
             const rgpd = document.getElementById('f_rgpd').checked;
 
-            if(!nom || !email || !telephone || !raison || !rgpd) return alert("Champs incomplets.");
+            if(!nom || !email || !telephone || !raison || !rgpd) {
+                showToast("Veuillez remplir tous les champs.", "error");
+                return;
+            }
 
             localStorage.setItem('user_nom', nom);
             localStorage.setItem('user_email', email);
@@ -248,9 +334,9 @@
                 const p = data[0];
                 upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
                 map.closePopup();
-                alert("Merci ! Votre proposition a été enregistrée.");
+                showToast("Proposition enregistrée avec succès ! ✨");
             } else {
-                alert("Erreur lors de l'envoi.");
+                showToast("Erreur lors de l'enregistrement.", "error");
             }
         }
 
@@ -266,14 +352,23 @@
                     allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data));
                     
                     const countEl = document.getElementById('v-' + id);
-                    if(countEl) countEl.innerText = allMarkers[id].data.votes;
+                    if(countEl) {
+                        countEl.innerText = allMarkers[id].data.votes;
+                        countEl.classList.add('vote-anim');
+                    }
                     const btnEl = document.getElementById('btn-' + id);
                     if(btnEl) { btnEl.disabled = true; btnEl.innerText = "Voté !"; }
+                    showToast("Merci pour votre vote ! ✨");
                 }
             }
         }
 
         loadMarkers();
+
+        setTimeout(() => {
+            const btn = document.getElementById('btn-help');
+            if (btn) btn.classList.remove('pulse-btn');
+        }, 8000);
     </script>
 </body>
 </html>
