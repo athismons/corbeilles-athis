@@ -5,13 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Athis-Mons | Corbeilles de rue</title>
     
-    <!-- Leaflet & Plugins -->
+    <!-- 1. LEAFLET CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- 2. MARKER CLUSTER CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
     
+    <!-- 3. SCRIPTS (ORDRE CRUCIAL) -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.js"></script>
+    <!-- Correction de l'URL ici : leaflet.markercluster.js au lieu de MarkerCluster.js -->
+    <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
@@ -22,14 +26,12 @@
             --shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
 
-        /* Fix scroll mobile & header stable */
         html, body { 
             height: 100%; width: 100%; margin: 0; padding: 0; 
             overflow: hidden; position: fixed;
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
         }
 
-        /* HEADER */
         header {
             height: var(--header-h);
             background: white;
@@ -42,7 +44,7 @@
             z-index: 1001;
         }
 
-        .header-logo { position: absolute; left: 15px; height: 65px; width: auto; transition: transform 0.3s; }
+        .header-logo { position: absolute; left: 15px; height: 65px; width: auto; }
         
         .header-title-container { text-align: center; max-width: 60%; }
         .fancy-title {
@@ -57,13 +59,11 @@
             line-height: 1.1;
         }
 
-        /* BOUTON AIDE ANIMÉ */
         .help-btn { 
             position: absolute; right: 15px;
             background: var(--primary); color: white; border: none; border-radius: 50%; 
             width: 42px; height: 42px; font-weight: bold; cursor: pointer; font-size: 1.3rem;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.3s;
         }
 
         @keyframes attention {
@@ -73,10 +73,8 @@
         }
         .pulse-btn { animation: attention 2s infinite ease-in-out; }
 
-        /* CARTE */
         #map { height: calc(100dvh - var(--header-h)); width: 100%; background: #f0f0f0; }
 
-        /* MODALE RESPONSIVE */
         #help-modal { 
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
             background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; 
@@ -89,7 +87,6 @@
         }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        /* TOAST NOTIFICATIONS */
         .toast {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
             background: rgba(0, 0, 0, 0.85); color: white; padding: 15px 30px;
@@ -101,7 +98,6 @@
         .toast.error { background: #dc3545; }
         .toast.success { background: var(--accent); }
 
-        /* VOTE ANIMATION */
         @keyframes votePop {
             0% { transform: scale(1); }
             50% { transform: scale(1.4); color: #ffd700; }
@@ -109,7 +105,6 @@
         }
         .vote-anim { animation: votePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
-        /* FORMULAIRE BULLS */
         .popup-form { min-width: 240px; }
         .popup-form input, .popup-form textarea { 
             width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 12px; 
@@ -117,11 +112,11 @@
         }
         .btn-submit { 
             background: var(--primary); color: white; border: none; padding: 12px; 
-            width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; transition: background 0.2s;
+            width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer;
         }
-        .btn-submit:active { background: #003366; }
+        .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
+        .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
 
-        /* LEAFLET UI */
         .leaflet-top.leaflet-right { top: 10px; right: 10px; }
         .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; }
 
@@ -137,6 +132,7 @@
 <body>
 
     <header>
+        <!-- Logo local -->
         <img src="./Logo-ville-dAthis-Mons.jpg" alt="Ville d'Athis-Mons" class="header-logo">
         <div class="header-title-container">
             <h1 class="fancy-title">Nouvelles corbeilles de rue :<br>dites-nous où !</h1>
@@ -148,7 +144,6 @@
 
     <div id="toast" class="toast"></div>
 
-    <!-- Modale Aide -->
     <div id="help-modal" onclick="toggleHelp()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--primary); margin-top:0;">Comment ça fonctionne ?</h2>
@@ -190,7 +185,6 @@
 
         const layersControl = L.control.layers({ "Plan": plan, "Aérien": satellite }, null, { position: 'topright' }).addTo(map);
 
-        // Menu calque mobile
         map.on('baselayerchange', () => {
             if (window.innerWidth < 600) { setTimeout(() => layersControl.collapse(), 100); }
         });
