@@ -56,13 +56,21 @@
 
         #map { height: calc(100dvh - var(--header-h)); width: 100%; background: #f0f0f0; }
 
+        /* BOUTON GEOLOCALISATION */
+        .leaflet-control-locate {
+            background: white; width: 34px; height: 34px; display: flex; 
+            align-items: center; justify-content: center; cursor: pointer;
+            border-radius: 4px; border: 2px solid rgba(0,0,0,0.2);
+        }
+        .leaflet-control-locate svg { width: 20px; height: 20px; fill: #444; }
+
         /* RECHERCHE */
         .search-container { position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 400px; z-index: 1005; }
         #search-input { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-size: 15px; outline: none; box-sizing: border-box; }
         #search-results { position: absolute; bottom: 100%; left: 0; width: 100%; background: white; border-radius: 15px; margin-bottom: 10px; box-shadow: var(--shadow); list-style: none; padding: 0; max-height: 200px; overflow-y: auto; display: none; }
         #search-results li { padding: 12px 20px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
 
-        /* MODALE */
+        /* MODALE AIDE */
         #help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; animation: slideUp 0.4s ease-out; }
         @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
@@ -73,25 +81,20 @@
         .toast.error { background: #dc3545; }
         .toast.success { background: var(--accent); }
 
-        /* VOTE ANIM */
-        @keyframes votePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #ffd700; } 100% { transform: scale(1); } }
-        .vote-anim { animation: votePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-
-        /* POPUPS */
+        /* POPUPS & FORM */
         .popup-form { min-width: 240px; }
-        .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
+        .popup-form label { display: block; font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 3px; }
+        .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
+        .btn-submit { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
-        .closed-badge { display: inline-block; margin-top: 10px; padding: 5px 12px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 15px; font-size: 11px; color: #666; font-weight: bold; }
         
-        .share-link { display: block; margin-top: 15px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; text-align: center; }
-        .share-link:hover { color: var(--primary); }
-
+        .share-link { display: block; margin-top: 12px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; text-align: center; }
         .counter-badge { background: var(--primary); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; }
 
-        .leaflet-top.leaflet-right { top: 10px; right: 10px; }
-        .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; }
+        .leaflet-top.leaflet-right { top: 10px; right: 10px; display: flex; flex-direction: column; gap: 10px; }
+        .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; margin: 0 !important; }
+        .leaflet-bar { border: none !important; box-shadow: var(--shadow) !important; margin: 0 !important; }
 
         @media (max-width: 600px) {
             .fancy-title { font-size: 1rem; }
@@ -124,36 +127,23 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--primary); margin-top:0;">Comment ça fonctionne ?</h2>
             <p>Bienvenue sur l'outil participatif de la <strong>Ville d'Athis-Mons</strong>.</p>
-            <p style="font-style: italic; color: #444; border-left: 3px solid var(--accent); padding-left: 10px; margin: 15px 0;">
-                Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre.
-            </p>
-            
-            <p style="text-align: center; margin: 20px 0;">
-                <span class="counter-badge"><span id="total-count">...</span> propositions enregistrées</span>
-            </p>
-
+            <p style="text-align: center; margin: 15px 0;"><span class="counter-badge"><span id="total-count">...</span> propositions enregistrées</span></p>
             <ol>
                 <li><strong>Proposez :</strong> Cliquez sur la carte à l'intérieur des limites de la ville.</li>
-                <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
+                <li><strong>Détaillez :</strong> L'adresse s'affiche automatiquement, précisez la raison du choix.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
-            
             <hr>
-            
             <h4>Utilisation des données & Cookies</h4>
-            <p style="font-size: 12px; color: #666; line-height: 1.4;">
-                • <strong>LocalStorage :</strong> Vos coordonnées (nom, email, téléphone) sont mémorisées uniquement sur votre navigateur pour vous éviter de les ressaisir lors de vos prochains dépôts. Ces données restent sur votre appareil.<br><br>
-                • <strong>RGPD & Confidentialité :</strong> Seule la description de l'emplacement est rendue publique sur la carte. Vos informations personnelles sont strictement réservées aux services techniques de la Ville pour le traitement des demandes et ne seront jamais publiées.
+            <p style="font-size: 11px; color: #666; line-height: 1.4;">
+                • <strong>LocalStorage :</strong> Coordonnées mémorisées sur votre appareil pour faciliter vos dépôts.<br>
+                • <strong>RGPD :</strong> Seule la description est publique. Vos informations sont réservées aux services techniques.
             </p>
-            
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
 
     <script>
-        // ==========================================
-        // CONFIGURATION
-        // ==========================================
         const IS_CLOSED = false; 
         const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co';
         const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';
@@ -189,12 +179,6 @@
             setTimeout(() => toast.classList.remove('show'), 2500);
         }
 
-        function updateTotalCount() {
-            const count = Object.keys(allMarkers).length;
-            const el = document.getElementById('total-count');
-            if (el) el.innerText = count;
-        }
-
         function toggleHelp() {
             const m = document.getElementById('help-modal');
             document.getElementById('btn-help').classList.remove('pulse-btn');
@@ -214,12 +198,35 @@
             return inside;
         }
 
-        function copyLink(id) {
-            const url = `https://athismons.github.io/corbeilles-athis/?proposition=${id}`;
-            navigator.clipboard.writeText(url).then(() => {
-                showToast("Lien copié dans le presse-papiers !");
-            });
+        async function reverseGeocode(lat, lng) {
+            try {
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+                const data = await response.json();
+                if (data.address) {
+                    const houseNumber = data.address.house_number || '';
+                    const road = data.address.road || '';
+                    return `${houseNumber} ${road}`.trim();
+                }
+            } catch (e) { console.error(e); }
+            return "";
         }
+
+        // --- BOUTON GEOLOCALISATION ---
+        const LocateControl = L.Control.extend({
+            options: { position: 'topright' },
+            onAdd: function() {
+                const div = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-locate');
+                div.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z"/></svg>`;
+                div.onclick = function(e) {
+                    e.stopPropagation();
+                    map.locate({setView: true, maxZoom: 17});
+                };
+                return div;
+            }
+        });
+        map.addControl(new LocateControl());
+
+        map.on('locationerror', () => showToast("Impossible d'accéder à votre position.", "error"));
 
         // --- RECHERCHE ---
         const searchInput = document.getElementById('search-input');
@@ -259,22 +266,13 @@
             const dateStr = d.toLocaleDateString('fr-FR');
             const heureStr = d.getHours().toString().padStart(2, '0') + 'h' + d.getMinutes().toString().padStart(2, '0');
             const voteAction = IS_CLOSED ? `<div class="closed-badge">Analyse en cours</div>` : `<button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} onclick="vote(${p.id}, ${p.votes})">${hasVoted ? 'Voté !' : 'Voter'}</button>`;
-
-            return `
-                <div class="popup-form">
-                    <p style="font-weight:bold; margin: 0 0 5px 0; font-size:14px; line-height:1.4;">${p.raison}</p>
-                    <p style="font-size:11px; color:#777; margin: 0 0 12px 0;">Proposition #${p.id} envoyée le ${dateStr} à ${heureStr}</p>
-                    <div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;"><span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>${voteAction}</div>
-                    <a class="share-link" onclick="copyLink(${p.id})">🔗 Partager cette proposition</a>
-                </div>`;
+            return `<div class="popup-form"><p style="font-weight:bold; margin: 0 0 5px 0; font-size:14px; line-height:1.4;">${p.raison}</p><p style="font-size:11px; color:#777; margin: 0 0 12px 0;">Proposition #${p.id} envoyée le ${dateStr} à ${heureStr}</p><div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;"><span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>${voteAction}</div><a class="share-link" onclick="copyLink(${p.id})">🔗 Partager cette proposition</a></div>`;
         }
 
         function upsertMarker(p) {
             if (allMarkers[p.id]) {
                 allMarkers[p.id].data = p;
                 allMarkers[p.id].setPopupContent(getPopupHTML(p));
-                const countEl = document.getElementById('v-' + p.id);
-                if (countEl) { countEl.innerText = p.votes; countEl.classList.add('vote-anim'); setTimeout(() => countEl.classList.remove('vote-anim'), 600); }
             } else {
                 const m = L.marker([p.lat, p.lng], { icon: binIcon });
                 m.data = p;
@@ -292,24 +290,19 @@
                 markersCluster.addLayer(m);
                 allMarkers[p.id] = m;
             }
-            updateTotalCount();
+            document.getElementById('total-count').innerText = Object.keys(allMarkers).length;
         }
 
         async function loadMarkers() {
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
                 data.forEach(p => upsertMarker(p));
-                setTimeout(checkDeepLink, 800);
-            }
-        }
-
-        function checkDeepLink() {
-            const params = new URLSearchParams(window.location.search);
-            const id = params.get('proposition');
-            if (id && allMarkers[id]) {
-                const m = allMarkers[id];
-                map.setView(m.getLatLng(), 17);
-                setTimeout(() => m.openPopup(), 400);
+                const params = new URLSearchParams(window.location.search);
+                const pid = params.get('proposition');
+                if (pid && allMarkers[pid]) {
+                    map.setView(allMarkers[pid].getLatLng(), 17);
+                    setTimeout(() => allMarkers[pid].openPopup(), 800);
+                }
             }
         }
 
@@ -318,22 +311,37 @@
             upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
         }).subscribe();
 
-        map.on('click', function(e) {
-            if (IS_CLOSED) { showToast("Les propositions sont closes.\nMerci pour votre participation. Les emplacements proposés sont en cours d’analyse par les services municipaux.", "info"); return; }
+        map.on('click', async function(e) {
+            if (IS_CLOSED) { showToast("Les propositions sont closes.\nMerci pour votre participation.", "info"); return; }
             if (!isPointInPoly(e.latlng, athisGeoJSON)) { showToast("Sélectionnez un emplacement dans les limites d'Athis-Mons.", "error"); return; }
+            
+            const addr = await reverseGeocode(e.latlng.lat, e.latlng.lng);
             const savedNom = localStorage.getItem('user_nom') || '';
             const savedEmail = localStorage.getItem('user_email') || '';
             const savedTel = localStorage.getItem('user_tel') || '';
-            const form = `<div class="popup-form"><h3 style="color:var(--primary); margin:0 0 10px 0;">Nouvelle suggestion</h3><input type="text" id="f_nom" placeholder="Nom et Prénom" value="${savedNom}"><input type="email" id="f_email" placeholder="Email" value="${savedEmail}"><input type="tel" id="f_tel" placeholder="Téléphone" value="${savedTel}"><textarea id="f_raison" placeholder="Décrivez le lieu et la raison..." rows="4"></textarea><div style="background: #f0f7ff; padding: 10px; border-radius: 6px; font-size: 11px; margin-bottom: 10px; color: #004085;"><b>Rappel :</b> Seule la description est publique. Vos coordonnées sont mémorisées localement.</div><div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><input type="checkbox" id="f_rgpd" style="width:auto; margin:0;"><label for="f_rgpd" style="font-size:11px; cursor:pointer;">J'accepte le traitement de ma demande.</label></div><button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Soumettre la proposition</button></div>`;
+            
+            const form = `
+                <div class="popup-form">
+                    <h3 style="color:var(--primary); margin:0 0 10px 0; font-size:15px;">Nouvelle suggestion</h3>
+                    <input type="text" id="f_nom" placeholder="Nom et Prénom" value="${savedNom}">
+                    <input type="email" id="f_email" placeholder="Email" value="${savedEmail}">
+                    <input type="tel" id="f_tel" placeholder="Téléphone" value="${savedTel}">
+                    <label>Décrivez la raison et le lieu :</label>
+                    <textarea id="f_raison" rows="4">${addr}\n</textarea>
+                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+                        <input type="checkbox" id="f_rgpd" style="width:auto; margin:0;">
+                        <label for="f_rgpd" style="font-size:10px; cursor:pointer; font-weight:normal;">J'accepte le traitement de ma demande.</label>
+                    </div>
+                    <button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Soumettre</button>
+                </div>`;
             L.popup().setLatLng(e.latlng).setContent(form).openOn(map);
         });
 
         async function submitData(lat, lng) {
-            if (IS_CLOSED) return;
-            const nom = document.getElementById('f_nom').value, email = document.getElementById('f_email').value, telephone = document.getElementById('f_tel').value, raison = document.getElementById('f_raison').value, rgpd = document.getElementById('f_rgpd').checked;
-            if(!nom || !email || !telephone || !raison || !rgpd) { showToast("Veuillez remplir tous les champs.", "error"); return; }
-            localStorage.setItem('user_nom', nom); localStorage.setItem('user_email', email); localStorage.setItem('user_tel', telephone);
-            const { data, error } = await supabaseClient.from('propositions').insert([{ lat, lng, nom_complet: nom, email, telephone, raison, consentement_rgpd: rgpd }]).select();
+            const nom = document.getElementById('f_nom').value, email = document.getElementById('f_email').value, tel = document.getElementById('f_tel').value, raison = document.getElementById('f_raison').value, rgpd = document.getElementById('f_rgpd').checked;
+            if(!nom || !email || !tel || !raison || !rgpd) { showToast("Veuillez remplir tous les champs.", "error"); return; }
+            localStorage.setItem('user_nom', nom); localStorage.setItem('user_email', email); localStorage.setItem('user_tel', tel);
+            const { data, error } = await supabaseClient.from('propositions').insert([{ lat, lng, nom_complet: nom, email, telephone: tel, raison, consentement_rgpd: rgpd }]).select();
             if (!error && data) { upsertMarker({ id: data[0].id, lat: data[0].lat, lng: data[0].lng, raison: data[0].raison, votes: data[0].votes, created_at: data[0].created_at }); map.closePopup(); showToast("Proposition enregistrée ! ✨"); }
         }
 
@@ -348,6 +356,11 @@
                     showToast("Merci pour votre vote ! ✨");
                 }
             }
+        }
+
+        function copyLink(id) {
+            const url = `https://athismons.github.io/corbeilles-athis/?proposition=${id}`;
+            navigator.clipboard.writeText(url).then(() => showToast("Lien copié !"));
         }
 
         loadMarkers();
