@@ -170,7 +170,7 @@
 
         const layersControl = L.control.layers(
             { "Plan": plan, "Aérien": satellite }, 
-            { "Corbeilles existantes": existingBinsCluster }, // Décoché par défaut
+            { "Corbeilles existantes": existingBinsCluster },
             { position: 'topright' }
         ).addTo(map);
 
@@ -208,18 +208,21 @@
 
         async function reverseGeocode(lat, lng) {
             try {
-                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
+                // Limite à 2s pour ne pas bloquer l'UI
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2000);
+                const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`, { signal: controller.signal });
+                clearTimeout(timeoutId);
                 const data = await response.json();
                 if (data && data.address) {
                     const houseNumber = data.address.house_number || '';
                     const road = data.address.road || '';
                     return `${houseNumber} ${road}`.trim();
                 }
-            } catch (e) { console.error(e); }
-            return "Adresse inconnue";
+            } catch (e) { console.warn("Géocodage lent ou indisponible"); }
+            return "Adresse non détectée";
         }
 
-        // GPS
         const LocateControl = L.Control.extend({
             options: { position: 'topright' },
             onAdd: function() {
@@ -241,24 +244,26 @@
             const query = e.target.value;
             if (query.length < 3) { searchResults.style.display = 'none'; return; }
             searchTimeout = setTimeout(async () => {
-                const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}+Athis-Mons&addressdetails=1&limit=5`);
-                const data = await response.json();
-                searchResults.innerHTML = '';
-                if (data.length > 0) {
-                    data.forEach(item => {
-                        const li = document.createElement('li');
-                        li.innerText = item.display_name.split(', Athis-Mons')[0];
-                        li.onclick = () => {
-                            const bbox = item.boundingbox;
-                            map.fitBounds(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
-                            map.zoomOut(1); 
-                            searchResults.style.display = 'none';
-                            searchInput.value = li.innerText;
-                        };
-                        searchResults.appendChild(li);
-                    });
-                    searchResults.style.display = 'block';
-                }
+                try {
+                    const response = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${query}+Athis-Mons&addressdetails=1&limit=5`);
+                    const data = await response.json();
+                    searchResults.innerHTML = '';
+                    if (data.length > 0) {
+                        data.forEach(item => {
+                            const li = document.createElement('li');
+                            li.innerText = item.display_name.split(', Athis-Mons')[0];
+                            li.onclick = () => {
+                                const bbox = item.boundingbox;
+                                map.fitBounds(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
+                                map.zoomOut(1); 
+                                searchResults.style.display = 'none';
+                                searchInput.value = li.innerText;
+                            };
+                            searchResults.appendChild(li);
+                        });
+                        searchResults.style.display = 'block';
+                    } else { searchResults.style.display = 'none'; }
+                } catch(e) {}
             }, 300);
         });
 
@@ -296,20 +301,25 @@
             document.getElementById('total-count').innerText = Object.keys(allMarkers).length;
         }
 
-        // LOGIQUE CORBEILLES EXISTANTES (OSM)
+        // --- OPTIMISATION OSM : RECHERCHE PAR BBOX (Plus rapide) ---
         async function fetchOSMBins() {
             try {
                 const overpassUrl = 'https://overpass-api.de/api/interpreter';
-                const query = `[out:json][timeout:25];area["name"="Athis-Mons"]->.a;node(area.a)["amenity"="waste_basket"];out body;`;
+                // Requête par BBOX (Boîte englobante d'Athis-Mons) pour éviter le timeout
+                const query = `[out:json][timeout:15];node["amenity"="waste_basket"](48.69,2.35,48.73,2.42);out body;`;
                 const response = await fetch(`${overpassUrl}?data=${encodeURIComponent(query)}`);
-                const data = await response.json();
                 
-                data.elements.forEach(el => {
-                    const m = L.marker([el.lat, el.lon], { icon: existingBinIcon });
-                    m.bindPopup(`<div style="text-align:center"><b>Corbeille existante</b><br><small>Référencée sur OpenStreetMap</small></div>`);
-                    existingBinsCluster.addLayer(m);
-                });
-            } catch (e) { console.error("OSM error:", e); }
+                if (!response.ok) throw new Error('OSM server error');
+                
+                const data = await response.json();
+                if (data && data.elements) {
+                    data.elements.forEach(el => {
+                        const m = L.marker([el.lat, el.lon], { icon: existingBinIcon });
+                        m.bindPopup(`<div style="text-align:center"><b>Corbeille existante</b><br><small>Référencée sur OpenStreetMap</small></div>`);
+                        existingBinsCluster.addLayer(m);
+                    });
+                }
+            } catch (e) { console.warn("Impossible de charger les corbeilles existantes : le serveur OSM ne répond pas."); }
         }
 
         async function loadMarkers() {
@@ -327,13 +337,18 @@
             upsertMarker({ id: p.id, lat: p.lat, lng: p.lng, raison: p.raison, votes: p.votes, created_at: p.created_at });
         }).subscribe();
 
-        map.on('click', async function(e) {
+        map.on('click', function(e) {
             if (IS_CLOSED) { showToast("Les propositions sont closes.\nMerci pour votre participation.", "info"); return; }
             if (!isPointInPoly(e.latlng, athisGeoJSON)) { showToast("Sélectionnez un emplacement dans les limites d'Athis-Mons.", "error"); return; }
             const savedNom = localStorage.getItem('user_nom') || '', savedEmail = localStorage.getItem('user_email') || '', savedTel = localStorage.getItem('user_tel') || '';
             const formHTML = `<div class="popup-form"><h3 style="color:var(--primary); margin:0 0 10px 0; font-size:15px;">Nouvelle suggestion</h3><input type="text" id="f_nom" placeholder="Nom et Prénom" value="${savedNom}"><input type="email" id="f_email" placeholder="Email" value="${savedEmail}"><input type="tel" id="f_tel" placeholder="Téléphone" value="${savedTel}"><label>Décrivez la raison et le lieu :</label><textarea id="f_raison" rows="4">Chargement de l'adresse...</textarea><div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><input type="checkbox" id="f_rgpd" style="width:auto; margin:0;"><label for="f_rgpd" style="font-size:10px; cursor:pointer; font-weight:normal;">J'accepte le traitement de ma demande.</label></div><button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Soumettre</button></div>`;
             L.popup().setLatLng(e.latlng).setContent(formHTML).openOn(map);
-            reverseGeocode(e.latlng.lat, e.latlng.lng).then(addr => { if(document.getElementById('f_raison')) document.getElementById('f_raison').value = addr + "\n"; });
+            
+            // On cherche l'adresse sans bloquer l'affichage
+            reverseGeocode(e.latlng.lat, e.latlng.lng).then(addr => { 
+                const area = document.getElementById('f_raison');
+                if(area) area.value = addr + "\n"; 
+            });
         });
 
         async function submitData(lat, lng) {
