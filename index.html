@@ -6,41 +6,90 @@
     <title>Athis-Mons | Corbeilles de rue</title>
     <link rel="icon" type="image/svg+xml" href="./favicon.svg">
     
-    <!-- Bibliothèques -->
+    <!-- Leaflet & Plugins -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css" />
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css" />
+    
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        :root { --primary: #0056b3; --accent: #28a745; --header-h: 85px; --shadow: 0 4px 15px rgba(0,0,0,0.15); }
-        html, body { height: 100%; width: 100%; margin: 0; padding: 0; overflow: hidden; position: fixed; font-family: 'Segoe UI', system-ui, sans-serif; display: flex; flex-direction: column; }
+        :root { 
+            --primary: #0056b3; 
+            --accent: #28a745; 
+            --header-h: 85px;
+            --shadow: 0 4px 15px rgba(0,0,0,0.15);
+        }
 
-        header { height: var(--header-h); flex-shrink: 0; background: white; display: flex; align-items: center; justify-content: center; padding: 0 15px; box-shadow: var(--shadow); position: relative; z-index: 1001; }
+        html, body { 
+            height: 100%; width: 100%; margin: 0; padding: 0; 
+            overflow: hidden; position: fixed;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex; flex-direction: column;
+        }
+
+        header {
+            height: var(--header-h); flex-shrink: 0; background: white; 
+            display: flex; align-items: center; justify-content: center; 
+            padding: 0 15px; box-shadow: var(--shadow); position: relative; z-index: 1001;
+        }
         .header-logo { position: absolute; left: 15px; height: 55px; width: auto; }
         .header-title-container { text-align: center; max-width: 65%; }
-        .fancy-title { font-size: 1.1rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; letter-spacing: -0.2px; margin: 0; line-height: 1.1; }
-        .help-btn { position: absolute; right: 15px; background: var(--primary); color: white; border: none; border-radius: 50%; width: 40px; height: 40px; font-weight: bold; cursor: pointer; font-size: 1.3rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        
-        @keyframes attention { 0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0.7); } 70% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(0, 86, 179, 0); } 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0); } }
+        .fancy-title {
+            font-size: 1.1rem; font-weight: 900; background: linear-gradient(45deg, #003366, #0056b3);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            text-transform: uppercase; letter-spacing: -0.2px; margin: 0; line-height: 1.1;
+        }
+
+        .help-btn { 
+            position: absolute; right: 15px; background: var(--primary); color: white; border: none; 
+            border-radius: 50%; width: 40px; height: 40px; font-weight: bold; cursor: pointer; 
+            font-size: 1.3rem; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        @keyframes attention {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0.7); }
+            70% { transform: scale(1.15); box-shadow: 0 0 0 15px rgba(0, 86, 179, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(0, 86, 179, 0); }
+        }
         .pulse-btn { animation: attention 2s infinite ease-in-out; }
 
         #map { flex-grow: 1; width: 100%; background: #f0f0f0; z-index: 1; }
 
-        /* BARRE BASSE */
-        .bottom-bar { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; z-index: 1005; pointer-events: none; }
-        .counter-container { position: absolute; left: 20px; pointer-events: auto; background: var(--primary); color: white; padding: 12px 18px; border-radius: 30px; font-weight: bold; font-size: 12px; box-shadow: var(--shadow); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes counterBump { 0% { transform: scale(1); } 50% { transform: scale(1.15); background-color: var(--accent); } 100% { transform: scale(1); } }
-        .counter-bump { animation: counterBump 0.5s ease-out; }
+        /* BARRE D'OUTILS BAS DE PAGE */
+        .bottom-bar {
+            position: fixed; bottom: 25px; left: 0; right: 0;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 1005; pointer-events: none;
+        }
 
-        .search-gps-group { pointer-events: auto; display: flex; align-items: center; gap: 10px; width: 50%; max-width: 450px; }
+        .counter-container {
+            position: absolute; left: 20px;
+            pointer-events: auto; background: var(--primary); color: white; 
+            padding: 12px 18px; border-radius: 30px; font-weight: bold; font-size: 12px;
+            box-shadow: var(--shadow); white-space: nowrap;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .counter-bump { animation: counterBump 0.5s ease-out; }
+        @keyframes counterBump { 0% { transform: scale(1); } 50% { transform: scale(1.15); background-color: var(--accent); } 100% { transform: scale(1); } }
+
+        .search-gps-group {
+            pointer-events: auto; display: flex; align-items: center; gap: 10px;
+            width: 50%; max-width: 450px;
+        }
+
         .search-wrapper { position: relative; flex-grow: 1; }
-        #search-input { width: 100%; padding: 12px 40px 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-size: 15px; outline: none; box-sizing: border-box; }
+        #search-input { 
+            width: 100%; padding: 12px 40px 12px 20px; border: none; border-radius: 30px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-size: 15px; outline: none; 
+            box-sizing: border-box; background: white;
+        }
         #search-clear { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; display: none; font-size: 18px; font-weight: bold; }
         #search-results { position: absolute; bottom: 100%; left: 0; width: 100%; background: white; border-radius: 15px; margin-bottom: 10px; box-shadow: var(--shadow); list-style: none; padding: 0; max-height: 200px; overflow-y: auto; display: none; }
         #search-results li { padding: 12px 20px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+
         .btn-gps { width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); cursor: pointer; border: none; flex-shrink: 0; }
         .btn-gps svg { width: 22px; height: 22px; fill: #444; }
 
@@ -77,10 +126,9 @@
         .vote-anim { animation: votePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         .leaflet-top.leaflet-right { top: 10px; right: 10px; display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 12px !important; }
-        .leaflet-control { margin: 0 !important; }
 
         @media (max-width: 600px) {
-            .fancy-title { font-size: 0.9rem; }
+            .fancy-title { font-size: 0.95rem; }
             .header-logo { height: 45px; }
             .bottom-bar { flex-direction: column; bottom: 15px; gap: 10px; }
             .search-gps-group { position: relative; left: 0; transform: none; width: 90%; order: 1; }
@@ -129,7 +177,7 @@
             </ol>
             <hr>
             <h4>Utilisation des données & Cookies</h4>
-            <p style="font-size: 11px; color: #666; line-height: 1.4;">• <strong>LocalStorage :</strong> Vos coordonnées sont mémorisées uniquement sur votre navigateur pour faciliter vos dépôts. Ces données restent sur votre appareil.<br><br>• <strong>RGPD :</strong> Seule la description est publique. Vos informations personnelles sont strictement réservées aux services techniques de la Ville.</p>
+            <p style="font-size: 11px; color: #666; line-height: 1.4;">• <strong>LocalStorage :</strong> Vos coordonnées sont mémorisées uniquement sur votre navigateur pour faciliter vos dépôts.<br><br>• <strong>RGPD :</strong> Seule la description est publique. Vos informations personnelles sont strictement réservées aux services techniques de la Ville.</p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
@@ -193,7 +241,8 @@
 
         // --- MARQUEURS & INFOBULLES ---
         function getPopupHTML(p) {
-            const hasVoted = localStorage.getItem('voted_' + p.id);
+            // FIX: Condition stricte === 'true'
+            const hasVoted = localStorage.getItem('voted_' + p.id) === 'true';
             const d = new Date(p.created_at);
             const dateStr = d.toLocaleDateString('fr-FR');
             const heureStr = d.getHours().toString().padStart(2, '0') + 'h' + d.getMinutes().toString().padStart(2, '0');
@@ -208,23 +257,28 @@
             return html;
         }
 
-        async function adminDelete(id) {
-            if (!confirm("Supprimer définitivement cette proposition ?")) return;
-            const cle = new URLSearchParams(window.location.search).get('admin');
-            const { error } = await supabaseClient.rpc('supprimer_proposition', { id_poubelle: id, cle_fournie: cle });
-            if (!error) { showToast("Proposition supprimée."); if(allMarkers[id]) markersCluster.removeLayer(allMarkers[id]); delete allMarkers[id]; updateGlobalStats(); }
-            else { showToast("Erreur admin.", "error"); }
-        }
-
         function copyLinkToClipboard(id) {
             const url = `https://athismons.github.io/corbeilles-athis/?proposition=${id}`;
             const el = document.createElement('textarea'); el.value = url; document.body.appendChild(el); el.select();
             document.execCommand('copy'); document.body.removeChild(el); showToast("Lien copié ! ✨", "success");
         }
 
+        async function adminDelete(id) {
+            if (!confirm("Supprimer définitivement cette proposition ?")) return;
+            const cle = new URLSearchParams(window.location.search).get('admin');
+            const { error } = await supabaseClient.rpc('supprimer_proposition', { id_poubelle: id, cle_fournie: cle });
+            if (!error) { showToast("Proposition supprimée."); if(allMarkers[id]) markersCluster.removeLayer(allMarkers[id]); delete allMarkers[id]; updateGlobalStats(); }
+            else { showToast("Accès refusé.", "error"); }
+        }
+
         function upsertMarker(p) {
-            if (allMarkers[p.id]) { allMarkers[p.id].data = p; allMarkers[p.id].setPopupContent(getPopupHTML(p)); }
-            else {
+            if (allMarkers[p.id]) { 
+                allMarkers[p.id].data = p; 
+                allMarkers[p.id].setPopupContent(getPopupHTML(p)); 
+                // Mise à jour visuelle du compteur si popup ouverte
+                const countEl = document.getElementById('v-' + p.id);
+                if (countEl) countEl.innerText = p.votes;
+            } else {
                 const m = L.marker([p.lat, p.lng], { icon: binIcon }); m.data = p; m.bindPopup(getPopupHTML(p));
                 m.on('popupopen', () => { const url = new URL(window.location); url.searchParams.set('proposition', p.id); window.history.replaceState({}, '', url); });
                 m.on('popupclose', () => { if(!new URLSearchParams(window.location.search).get('admin')) { const url = new URL(window.location); url.searchParams.delete('proposition'); window.history.replaceState({}, '', url); } });
@@ -233,15 +287,24 @@
             updateGlobalStats();
         }
 
-        // --- CHARGEMENT ---
+        async function fetchConfig() {
+            const { data } = await supabaseClient.from('config').select('*');
+            if (data) {
+                const closedSetting = data.find(c => c.key === 'is_closed');
+                if (closedSetting) {
+                    appState.isClosed = closedSetting.value;
+                    Object.values(allMarkers).forEach(m => m.setPopupContent(getPopupHTML(m.data)));
+                }
+            }
+        }
+
         async function fetchOSMBins() {
             toggleLoader("Chargement des corbeilles OSM...", true);
             try {
                 const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent('[out:json][timeout:15];node["amenity"="waste_basket"](48.69,2.35,48.73,2.42);out body;')}`);
                 const data = await res.json();
                 data.elements.forEach(el => {
-                    const latlng = {lat: el.lat, lng: el.lon};
-                    if (!isPointInPoly(latlng, athisGeoJSON)) return;
+                    if (!isPointInPoly({lat: el.lat, lng: el.lon}, athisGeoJSON)) return;
                     const m = L.marker([el.lat, el.lon], { icon: existingBinIcon }); 
                     m.bindPopup(`<div style="text-align:center"><b>Corbeille référencée sur OpenStreetMap</b></div>`); 
                     existingBinsCluster.addLayer(m);
@@ -251,9 +314,7 @@
         }
 
         async function loadMarkers() {
-            const { data: configData } = await supabaseClient.from('config').select('*');
-            if (configData) { const closed = configData.find(c => c.key === 'is_closed'); if (closed) appState.isClosed = closed.value; }
-            
+            await fetchConfig();
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
                 data.forEach(p => upsertMarker(p));
@@ -264,17 +325,16 @@
             fetchOSMBins();
         }
 
-        supabaseClient.channel('db-all').on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
+        // --- EVENTS & REALTIME ---
+        supabaseClient.channel('db-propositions').on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (payload) => {
             if (payload.eventType === 'DELETE') { if(allMarkers[payload.old.id]) { markersCluster.removeLayer(allMarkers[payload.old.id]); delete allMarkers[payload.old.id]; updateGlobalStats(); } }
             else { upsertMarker({ ...payload.new }); }
         }).subscribe();
 
-        supabaseClient.channel('config-watch').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' }, (payload) => {
-            if (payload.new.key === 'is_closed') { appState.isClosed = payload.new.value; Object.values(allMarkers).forEach(m => m.setPopupContent(getPopupHTML(m.data))); }
-        }).subscribe();
+        supabaseClient.channel('db-config').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' }, () => { fetchConfig(); }).subscribe();
 
         map.on('click', async function(e) {
-            if (appState.isClosed) { showToast("Les propositions sont closes.", "info"); return; }
+            if (appState.isClosed) { showToast("Les propositions sont closes.\nMerci pour votre participation.", "info"); return; }
             if (!isPointInPoly(e.latlng, athisGeoJSON)) { showToast("Sélectionner un emplacement situé à Athis-Mons.", "error"); return; }
             
             const addr = await (async (lat, lng) => {
@@ -282,7 +342,7 @@
                 try {
                     const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&addressdetails=1`);
                     const d = await r.json(); toggleLoader("", false);
-                    return d && d.address ? `${d.address.house_number || ''} ${d.address.road || ''}`.trim() : "Adresse non détectée";
+                    return d && d.address ? `${d.address.house_number || ''} ${d.address.road || ''}`.trim() : "";
                 } catch(e) { toggleLoader("", false); return ""; }
             })(e.latlng.lat, e.latlng.lng);
 
@@ -296,16 +356,26 @@
             if(!nom || !email || !tel || !raison || !rgpd) { showToast("Champs requis.", "error"); return; }
             localStorage.setItem('user_nom', nom); localStorage.setItem('user_email', email); localStorage.setItem('user_tel', tel);
             const { data, error } = await supabaseClient.from('propositions').insert([{ lat, lng, nom_complet: nom, email, telephone: tel, raison, consentement_rgpd: rgpd }]).select();
-            if (!error && data) { upsertMarker({ ...data[0] }); map.closePopup(); showToast("Enregistré ! ✨", "success"); }
+            if (!error && data) { 
+                // Ne pas mettre de voted_true ici pour laisser le créateur voter
+                upsertMarker({ ...data[0] }); 
+                map.closePopup(); 
+                showToast("Proposition enregistrée ! ✨", "success"); 
+            }
         }
 
         async function vote(ev, id, v) {
-            if(appState.isClosed || localStorage.getItem('voted_'+id)) return;
+            if(appState.isClosed || localStorage.getItem('voted_'+id) === 'true') return;
             const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
             if(!error) {
                 localStorage.setItem('voted_'+id, 'true');
-                if(allMarkers[id]) { allMarkers[id].data.votes += 1; allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data)); triggerWhaou(ev.clientX, ev.clientY); showToast("Merci ! ✨", "success"); }
-            }
+                if(allMarkers[id]) {
+                    allMarkers[id].data.votes += 1; 
+                    allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data));
+                    triggerWhaou(ev.clientX, ev.clientY); 
+                    showToast("Merci pour votre vote ! ✨", "success");
+                }
+            } else { showToast("Erreur lors du vote.", "error"); }
         }
 
         function toggleHelp() { const m = document.getElementById('help-modal'); document.getElementById('btn-help').classList.remove('pulse-btn'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
