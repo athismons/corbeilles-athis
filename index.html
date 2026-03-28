@@ -83,6 +83,14 @@
 
         /* POPUPS & FORM */
         .popup-form { min-width: 240px; }
+        /* PRESERVE LES SAUTS DE LIGNE DANS L'INFOBULLE */
+        .popup-form .raison-text { 
+            white-space: pre-line; 
+            font-weight: bold; 
+            margin: 0 0 5px 0; 
+            font-size: 14px; 
+            line-height: 1.4; 
+        }
         .popup-form label { display: block; font-size: 11px; font-weight: bold; color: var(--primary); margin-bottom: 3px; }
         .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
         .btn-submit { background: var(--primary); color: white; border: none; padding: 10px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
@@ -91,6 +99,9 @@
         
         .share-link { display: block; margin-top: 12px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; text-align: center; }
         .counter-badge { background: var(--primary); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; }
+
+        @keyframes votePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #ffd700; } 100% { transform: scale(1); } }
+        .vote-anim { animation: votePop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         .leaflet-top.leaflet-right { top: 10px; right: 10px; display: flex; flex-direction: column; gap: 10px; }
         .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; margin: 0 !important; }
@@ -219,7 +230,8 @@
                 div.innerHTML = `<svg viewBox="0 0 24 24"><path d="M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4Z"/></svg>`;
                 div.onclick = function(e) {
                     e.stopPropagation();
-                    map.locate({setView: true, maxZoom: 17});
+                    // Niveau de zoom supérieur lors de la géolocalisation
+                    map.locate({setView: true, maxZoom: 19});
                 };
                 return div;
             }
@@ -266,7 +278,15 @@
             const dateStr = d.toLocaleDateString('fr-FR');
             const heureStr = d.getHours().toString().padStart(2, '0') + 'h' + d.getMinutes().toString().padStart(2, '0');
             const voteAction = IS_CLOSED ? `<div class="closed-badge">Analyse en cours</div>` : `<button id="btn-${p.id}" class="btn-vote" ${hasVoted ? 'disabled' : ''} onclick="vote(${p.id}, ${p.votes})">${hasVoted ? 'Voté !' : 'Voter'}</button>`;
-            return `<div class="popup-form"><p style="font-weight:bold; margin: 0 0 5px 0; font-size:14px; line-height:1.4;">${p.raison}</p><p style="font-size:11px; color:#777; margin: 0 0 12px 0;">Proposition #${p.id} envoyée le ${dateStr} à ${heureStr}</p><div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;"><span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>${voteAction}</div><a class="share-link" onclick="copyLink(${p.id})">🔗 Partager cette proposition</a></div>`;
+            
+            // Note: class raison-text gère le white-space: pre-line via CSS
+            return `
+                <div class="popup-form">
+                    <p class="raison-text">${p.raison}</p>
+                    <p style="font-size:11px; color:#777; margin: 0 0 12px 0;">Proposition #${p.id} envoyée le ${dateStr} à ${heureStr}</p>
+                    <div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;"><span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>${voteAction}</div>
+                    <a class="share-link" onclick="copyLink(${p.id})">🔗 Partager cette proposition</a>
+                </div>`;
         }
 
         function upsertMarker(p) {
