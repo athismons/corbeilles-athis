@@ -88,6 +88,8 @@
         .share-link { display: block; margin-top: 15px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; text-align: center; }
         .share-link:hover { color: var(--primary); }
 
+        .counter-badge { background: var(--primary); color: white; padding: 5px 12px; border-radius: 15px; font-weight: bold; }
+
         .leaflet-top.leaflet-right { top: 10px; right: 10px; }
         .leaflet-control-layers { border-radius: 12px !important; box-shadow: var(--shadow) !important; }
 
@@ -125,15 +127,25 @@
             <p style="font-style: italic; color: #444; border-left: 3px solid var(--accent); padding-left: 10px; margin: 15px 0;">
                 Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre.
             </p>
+            
+            <p style="text-align: center; margin: 20px 0;">
+                <span class="counter-badge"><span id="total-count">...</span> propositions enregistrées</span>
+            </p>
+
             <ol>
                 <li><strong>Proposez :</strong> Cliquez sur la carte à l'intérieur des limites de la ville.</li>
                 <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
+            
             <hr>
-            <p style="font-size: 12px; color: #666;">
-                <strong>Lien direct :</strong> Partagez une proposition spécifique via le lien présent dans chaque fiche.
+            
+            <h4>Utilisation des données & Cookies</h4>
+            <p style="font-size: 12px; color: #666; line-height: 1.4;">
+                • <strong>LocalStorage :</strong> Vos coordonnées (nom, email, téléphone) sont mémorisées uniquement sur votre navigateur pour vous éviter de les ressaisir lors de vos prochains dépôts. Ces données restent sur votre appareil.<br><br>
+                • <strong>RGPD & Confidentialité :</strong> Seule la description de l'emplacement est rendue publique sur la carte. Vos informations personnelles sont strictement réservées aux services techniques de la Ville pour le traitement des demandes et ne seront jamais publiées.
             </p>
+            
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
@@ -175,6 +187,12 @@
             toast.innerText = message;
             toast.className = `toast show ${type}`;
             setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        function updateTotalCount() {
+            const count = Object.keys(allMarkers).length;
+            const el = document.getElementById('total-count');
+            if (el) el.innerText = count;
         }
 
         function toggleHelp() {
@@ -223,7 +241,7 @@
                         li.onclick = () => {
                             const bbox = item.boundingbox;
                             map.fitBounds(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
-                            map.zoomOut(1); // Dézoome d'un niveau après le focus rue
+                            map.zoomOut(1); 
                             searchResults.style.display = 'none';
                             searchInput.value = li.innerText;
                         };
@@ -246,10 +264,7 @@
                 <div class="popup-form">
                     <p style="font-weight:bold; margin: 0 0 5px 0; font-size:14px; line-height:1.4;">${p.raison}</p>
                     <p style="font-size:11px; color:#777; margin: 0 0 12px 0;">Proposition #${p.id} envoyée le ${dateStr} à ${heureStr}</p>
-                    <div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;">
-                        <span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>
-                        ${voteAction}
-                    </div>
+                    <div style="text-align:center; border-top: 1px solid #eee; padding-top:10px;"><span style="font-size:1.1rem; display:block; margin-bottom:5px;">👍 <b id="v-${p.id}">${p.votes}</b></span>${voteAction}</div>
                     <a class="share-link" onclick="copyLink(${p.id})">🔗 Partager cette proposition</a>
                 </div>`;
         }
@@ -264,7 +279,6 @@
                 const m = L.marker([p.lat, p.lng], { icon: binIcon });
                 m.data = p;
                 m.bindPopup(getPopupHTML(p));
-                
                 m.on('popupopen', () => {
                     const url = new URL(window.location);
                     url.searchParams.set('proposition', p.id);
@@ -275,17 +289,17 @@
                     url.searchParams.delete('proposition');
                     window.history.replaceState({}, '', url);
                 });
-
                 markersCluster.addLayer(m);
                 allMarkers[p.id] = m;
             }
+            updateTotalCount();
         }
 
         async function loadMarkers() {
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
                 data.forEach(p => upsertMarker(p));
-                setTimeout(checkDeepLink, 800); // Délai pour laisser le clustering s'initialiser
+                setTimeout(checkDeepLink, 800);
             }
         }
 
@@ -294,7 +308,6 @@
             const id = params.get('proposition');
             if (id && allMarkers[id]) {
                 const m = allMarkers[id];
-                // Focus avec zoom modéré (niveau 17 au lieu de 18 pour dézoomer un peu)
                 map.setView(m.getLatLng(), 17);
                 setTimeout(() => m.openPopup(), 400);
             }
