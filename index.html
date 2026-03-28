@@ -85,7 +85,7 @@
         .btn-vote:disabled { background: #ccc; cursor: not-allowed; }
         .closed-badge { display: inline-block; margin-top: 10px; padding: 5px 12px; background: #f8f9fa; border: 1px solid #ddd; border-radius: 15px; font-size: 11px; color: #666; font-weight: bold; }
         
-        .share-link { display: block; margin-top: 15px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; }
+        .share-link { display: block; margin-top: 15px; font-size: 10px; color: #999; text-decoration: none; border-top: 1px solid #eee; padding-top: 8px; cursor: pointer; text-align: center; }
         .share-link:hover { color: var(--primary); }
 
         .leaflet-top.leaflet-right { top: 10px; right: 10px; }
@@ -132,7 +132,7 @@
             </ol>
             <hr>
             <p style="font-size: 12px; color: #666;">
-                <strong>Lien direct :</strong> Chaque proposition possède un lien unique partageable pour mobiliser vos voisins.
+                <strong>Lien direct :</strong> Partagez une proposition spécifique via le lien présent dans chaque fiche.
             </p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
@@ -197,7 +197,7 @@
         }
 
         function copyLink(id) {
-            const url = `${window.location.origin}${window.location.pathname}?id=${id}`;
+            const url = `https://athismons.github.io/corbeilles-athis/?proposition=${id}`;
             navigator.clipboard.writeText(url).then(() => {
                 showToast("Lien copié dans le presse-papiers !");
             });
@@ -223,6 +223,7 @@
                         li.onclick = () => {
                             const bbox = item.boundingbox;
                             map.fitBounds(L.latLngBounds([bbox[0], bbox[2]], [bbox[1], bbox[3]]));
+                            map.zoomOut(1); // Dézoome d'un niveau après le focus rue
                             searchResults.style.display = 'none';
                             searchInput.value = li.innerText;
                         };
@@ -264,15 +265,14 @@
                 m.data = p;
                 m.bindPopup(getPopupHTML(p));
                 
-                // Gestion de l'URL permalien
                 m.on('popupopen', () => {
                     const url = new URL(window.location);
-                    url.searchParams.set('id', p.id);
+                    url.searchParams.set('proposition', p.id);
                     window.history.replaceState({}, '', url);
                 });
                 m.on('popupclose', () => {
                     const url = new URL(window.location);
-                    url.searchParams.delete('id');
+                    url.searchParams.delete('proposition');
                     window.history.replaceState({}, '', url);
                 });
 
@@ -285,17 +285,18 @@
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
             if (data) {
                 data.forEach(p => upsertMarker(p));
-                checkDeepLink(); // Vérifier si un ID est présent dans l'URL après chargement
+                setTimeout(checkDeepLink, 800); // Délai pour laisser le clustering s'initialiser
             }
         }
 
         function checkDeepLink() {
             const params = new URLSearchParams(window.location.search);
-            const id = params.get('id');
+            const id = params.get('proposition');
             if (id && allMarkers[id]) {
                 const m = allMarkers[id];
-                map.setView(m.getLatLng(), 18);
-                setTimeout(() => m.openPopup(), 500);
+                // Focus avec zoom modéré (niveau 17 au lieu de 18 pour dézoomer un peu)
+                map.setView(m.getLatLng(), 17);
+                setTimeout(() => m.openPopup(), 400);
             }
         }
 
