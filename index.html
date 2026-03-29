@@ -36,8 +36,6 @@
             padding: 0 15px; box-shadow: var(--shadow); position: relative; z-index: 1001;
         }
         .header-logo { position: absolute; left: 15px; height: 55px; width: auto; }
-        
-        /* TITRE IMAGE RGAA */
         .header-title-container { display: flex; align-items: center; justify-content: center; max-width: 60%; }
         .title-image { max-height: 55px; max-width: 100%; height: auto; object-fit: contain; }
 
@@ -52,18 +50,32 @@
 
         #map { flex-grow: 1; width: 100%; background: #f0f0f0; z-index: 1; }
 
-        /* BARRE D'OUTILS BAS DE PAGE */
-        .bottom-bar { position: fixed; bottom: 25px; left: 0; right: 0; display: flex; align-items: center; justify-content: center; z-index: 1005; pointer-events: none; }
-        .counter-container { position: absolute; left: 20px; pointer-events: auto; background: var(--primary); color: white; padding: 12px 18px; border-radius: 30px; font-weight: bold; font-size: 12px; box-shadow: var(--shadow); white-space: nowrap; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        /* BARRE BASSE */
+        .bottom-bar { 
+            position: fixed; bottom: 25px; left: 0; right: 0; 
+            display: flex; align-items: center; justify-content: center; 
+            z-index: 1005; pointer-events: none;
+        }
+        .counter-container { 
+            position: absolute; left: 20px; pointer-events: auto; 
+            background: var(--primary); color: white; padding: 12px 18px; 
+            border-radius: 30px; font-weight: bold; font-size: 12px; 
+            box-shadow: var(--shadow); white-space: nowrap; 
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
         .counter-bump { animation: counterBump 0.5s ease-out; }
         @keyframes counterBump { 0% { transform: scale(1); } 50% { transform: scale(1.15); background-color: var(--accent); } 100% { transform: scale(1); } }
 
-        .search-gps-group { pointer-events: auto; display: flex; align-items: center; gap: 10px; width: 50%; max-width: 450px; }
+        .search-gps-group { 
+            pointer-events: auto; display: flex; align-items: center; gap: 10px; 
+            width: 45%; max-width: 400px; 
+        }
         .search-wrapper { position: relative; flex-grow: 1; }
         #search-input { width: 100%; padding: 12px 40px 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); font-size: 15px; outline: none; box-sizing: border-box; background: white; }
         #search-clear { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); cursor: pointer; color: #999; display: none; font-size: 18px; font-weight: bold; }
         #search-results { position: absolute; bottom: 100%; left: 0; width: 100%; background: white; border-radius: 15px; margin-bottom: 10px; box-shadow: var(--shadow); list-style: none; padding: 0; max-height: 200px; overflow-y: auto; display: none; }
         #search-results li { padding: 12px 20px; border-bottom: 1px solid #eee; cursor: pointer; font-size: 14px; }
+        
         .btn-gps { width: 45px; height: 45px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2); cursor: pointer; border: none; flex-shrink: 0; }
         .btn-gps svg { width: 22px; height: 22px; fill: #444; }
 
@@ -71,18 +83,14 @@
         .spinner { width: 12px; height: 12px; border: 2px solid #ddd; border-top: 2px solid var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* TOASTS */
         .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; padding: 20px 30px; border-radius: 25px; z-index: 3000; font-weight: 500; text-align: center; pointer-events: none; opacity: 0; transition: opacity 0.4s, transform 0.4s; box-shadow: var(--shadow); width: auto; min-width: 220px; line-height: 1.4; }
         .toast.show { opacity: 1; transform: translate(-50%, -55%); }
         .toast.error { background: #dc3545 !important; }
         .toast.success { background: var(--accent) !important; }
-        .toast.info { background: #343a40 !important; }
 
-        /* MODALE AIDE */
         #help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 90%; max-width: 450px; box-sizing: border-box; max-height: 85vh; overflow-y: auto; }
 
-        /* INFOBULLES */
         .popup-form { min-width: 250px; }
         .raison-display { white-space: pre-wrap !important; font-weight: bold; margin: 0 0 8px 0; font-size: 14px; line-height: 1.4; color: #333; }
         .popup-form input, .popup-form textarea { width: 100%; box-sizing: border-box; margin-bottom: 10px; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 13px; }
@@ -90,11 +98,11 @@
         .btn-submit { background: var(--primary); color: white; border: none; padding: 12px; width: 100%; border-radius: 8px; font-weight: bold; cursor: pointer; }
         .btn-vote { background: var(--accent); color: white; border: none; padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold; margin-top: 10px; }
         .btn-vote:disabled { background: #ccc !important; cursor: not-allowed !important; }
+        
         .share-link { display: block; margin-top: 15px; font-size: 11px; color: var(--primary); text-decoration: none; border-top: 1px solid #eee; padding-top: 10px; cursor: pointer; text-align: center; font-weight: 600; }
         .admin-delete { display: block; margin-top: 10px; color: #dc3545; font-size: 10px; font-weight: bold; text-align: center; cursor: pointer; border: 1px dashed #dc3545; padding: 5px; border-radius: 5px; }
         .admin-toggle-row { border-top: 1px solid #eee; margin-top: 5px; padding-top: 5px; color: #dc3545; font-weight: bold; font-size: 12px; }
 
-        /* VOTE PARTICULES */
         .vote-particle { position: fixed; pointer-events: none; z-index: 9999; font-size: 24px; animation: particleFloat 0.8s ease-out forwards; }
         @keyframes particleFloat { 0% { transform: translate(0, 0) scale(0.5); opacity: 1; } 100% { transform: translate(var(--x), var(--y)) scale(1.5) rotate(20deg); opacity: 0; } }
         @keyframes votePop { 0% { transform: scale(1); } 50% { transform: scale(1.4); color: #ffd700; } 100% { transform: scale(1); } }
@@ -103,8 +111,8 @@
         .leaflet-top.leaflet-right { top: 10px; right: 10px; display: flex !important; flex-direction: column !important; align-items: flex-end !important; gap: 12px !important; }
 
         @media (max-width: 600px) {
+            .fancy-title { font-size: 0.95rem; }
             .header-logo { height: 45px; }
-            .title-image { max-height: 40px; }
             .bottom-bar { flex-direction: column; bottom: 15px; gap: 10px; }
             .search-gps-group { position: relative; left: 0; transform: none; width: 90%; order: 1; }
             .counter-container { position: relative; left: 0; order: 2; font-size: 11px; }
@@ -114,7 +122,7 @@
 <body>
 
     <header>
-        <img src="./Logo-ville-dAthis-Mons.jpg" alt="Logo Ville d'Athis-Mons" class="header-logo">
+        <img src="./Logo-ville-dAthis-Mons.jpg" alt="Logo" class="header-logo">
         <h1 class="header-title-container">
             <img src="./titre.png" alt="Nouvelles corbeilles de rue : dites-nous où !" class="title-image">
         </h1>
@@ -144,15 +152,15 @@
         <div class="modal-content" onclick="event.stopPropagation()">
             <h2 style="color:var(--primary); margin-top:0;">Comment ça fonctionne ?</h2>
             <p>Bienvenue sur l'outil participatif de la <strong>Ville d'Athis-Mons</strong>.</p>
-            <p style="font-style: italic; color: #444; border-left: 3px solid var(--accent); padding-left: 10px; margin: 15px 0;">Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre et un cadre de vie plus agréable.</p>
+            <p style="font-style: italic; color: #444; border-left: 3px solid var(--accent); padding-left: 10px; margin: 15px 0;">Cette initiative citoyenne vise à optimiser l'implantation des corbeilles de rue pour une ville plus propre et un cadre de vie plus agréable au quotidien.</p>
             <ol>
                 <li><strong>Proposez :</strong> Cliquez sur la carte à l'intérieur des limites bleues de la ville.</li>
                 <li><strong>Détaillez :</strong> Décrivez précisément le lieu et la raison du choix.</li>
                 <li><strong>Soutenez :</strong> Votez pour les propositions déjà existantes.</li>
             </ol>
             <hr>
-            <h4>Données & Cookies</h4>
-            <p style="font-size: 11px; color: #666; line-height: 1.4;">• <strong>LocalStorage :</strong> Vos coordonnées sont mémorisées uniquement sur votre navigateur pour faciliter vos dépôts.<br><br>• <strong>RGPD :</strong> Seule la description est publique. Vos informations personnelles sont strictement réservées aux services techniques.</p>
+            <h4>Utilisation des données & Cookies</h4>
+            <p style="font-size: 11px; color: #666; line-height: 1.4;">• <strong>LocalStorage :</strong> Vos coordonnées sont mémorisées uniquement sur votre navigateur pour faciliter vos dépôts.<br><br>• <strong>RGPD :</strong> Seule la description est publique. Vos informations personnelles sont strictement réservées aux services techniques de la Ville.</p>
             <button class="btn-submit" onclick="toggleHelp()">Fermer</button>
         </div>
     </div>
@@ -163,9 +171,8 @@
 
         let appState = { isClosed: false };
         let allMarkers = {};
-        const SUPABASE_URL = 'https://rlflghinizkorghtvcbj.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM';
-        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        const supabaseClient = supabase.createClient('https://rlflghinizkorghtvcbj.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJsZmxnaGluaXprb3JnaHR2Y2JqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA2OTcsImV4cCI6MjA5MDEyNjY5N30.m2nZ2_19bRLHEc_aSyMP0JSoKRhrzoSF8gYLmYYbzdM');
 
         // SONS
         const sndVote = new Audio('./vote.mp3');
@@ -174,7 +181,7 @@
 
         // ICONES
         const binIcon = L.divIcon({ html: `<svg width="32" height="32" viewBox="0 0 1024 1024"><circle cx="512" cy="512" r="480" fill="#0055A0" /><g transform="translate(192, 192) scale(0.625)" fill="#FFFFFF"><path d="M831.24 280.772c5.657 0 10.24-4.583 10.24-10.24v-83.528c0-5.657-4.583-10.24-10.24-10.24H194.558a10.238 10.238 0 00-10.24 10.24v83.528c0 5.657 4.583 10.24 10.24 10.24H831.24zm0 40.96H194.558c-28.278 0-51.2-22.922-51.2-51.2v-83.528c0-28.278 22.922-51.2 51.2-51.2H831.24c28.278 0 51.2 22.922 51.2 51.2v83.528c0 28.278-22.922 51.2-51.2 51.2z" /><path d="M806.809 304.688l-58.245 666.45c-.544 6.246-6.714 11.9-12.99 11.9H290.226c-6.276 0-12.447-5.654-12.99-11.893L218.99 304.688c-.985-11.268-10.917-19.604-22.185-18.619s-19.604 10.917-18.619 22.185l58.245 666.45c2.385 27.401 26.278 49.294 53.795 49.294h445.348c27.517 0 51.41-21.893 53.796-49.301l58.244-666.443c.985-11.268-7.351-21.201-18.619-22.185s-21.201 7.351-22.185 18.619zM422.02 155.082V51.3c0-5.726 4.601-10.342 10.24-10.342h161.28c5.639 0 10.24 4.617 10.24 10.342v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V51.3c0-28.316-22.908-51.302-51.2-51.302H432.26c-28.292 0-51.2 22.987-51.2 51.302v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48z" /><path d="M496.004 410.821v460.964c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V410.821c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48zm-192.435 1.767l39.936 460.964c.976 11.269 10.903 19.612 22.171 18.636s19.612-10.903 18.636-22.171l-39.936-460.964c-.976-11.269-10.903-19.612-22.171-18.636s-19.612 10.903-18.636 22.171zm377.856-3.535l-39.936 460.964c-.976 11.269 7.367 21.195 18.636 22.171s21.195-7.367 22.171-18.636l39.936-460.964c.976-11.269-7.367-21.195-18.636-22.171s-21.195 7.367-22.171 18.636z" /></g></svg>`, className: "" });
-        const existingBinIcon = L.divIcon({ html: `<svg width="32" height="32" viewBox="0 0 1024 1024"><circle cx="512" cy="512" r="480" fill="#28a745" /><g transform="translate(192, 192) scale(0.625)" fill="#FFFFFF"><path d="M831.24 280.772c5.657 0 10.24-4.583 10.24-10.24v-83.528c0-5.657-4.583-10.24-10.24-10.24H194.558a10.238 10.238 0 00-10.24 10.24v83.528c0 5.657 4.583 10.24 10.24 10.24H831.24zm0 40.96H194.558c-28.278 0-51.2-22.922-51.2-51.2v-83.528c0-28.278 22.922-51.2 51.2-51.2H831.24c28.278 0 51.2 22.922 51.2 51.2v83.528c0 28.278-22.922 51.2-51.2 51.2z" /><path d="M806.809 304.688l-58.245 666.45c-.544 6.246-6.714 11.9-12.99 11.9H290.226c-6.276 0-12.447-5.654-12.99-11.893L218.99 304.688c-.985-11.268-10.917-19.604-22.185-18.619s-19.604 10.917-18.619 22.185l58.245 666.45c2.385 27.401 26.278 49.294 53.795 49.294h445.348c27.517 0 51.41-21.893 53.796-49.301l58.244-666.443c.985-11.268-7.351-21.201-18.619-22.185s-21.201 7.351-22.185 18.619zM422.02 155.082V51.3c0-5.726 4.601-10.342 10.24-10.342h161.28c5.639 0 10.24 4.617 10.24 10.342v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V51.3c0-28.316-22.908-51.302-51.2-51.302H432.26c-28.292 0-51.2 22.987-51.2 51.302v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48z" /><path d="M496.004 410.821v460.964c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V410.821c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48zm-192.435 1.767l39.936 460.964c.976 11.269 10.903 19.612 22.171 18.636s19.612-10.903 18.636-22.171l-39.936-460.964c-.976-11.269-10.903-19.612-22.171-18.636s-19.612 10.903-18.636 22.171zm377.856-3.535l-39.936 460.964c-.976 11.269 7.367 21.195 18.636 22.171s21.195-7.367 22.171-18.636l39.936-460.964c.976-11.269-7.367-21.195-18.636-22.171s-21.195 7.367-22.171 18.636z" /></g></svg>`, className: "" });
+        const existingBinIcon = L.divIcon({ html: `<svg width="32" height="32" viewBox="0 0 1024 1024"><circle cx="512" cy="512" r="480" fill="#28a745" /><g transform="translate(192, 192) scale(0.625)" fill="#FFFFFF"><path d="M831.24 280.772c5.657 0 10.24-4.583 10.24-10.24v-83.528c0-5.657-4.583-10.24-10.24-10.24H194.558a10.238 10.238 0 00-10.24 10.24v83.528c0 5.657 4.583 10.24 10.24 10.24H831.24zm0 40.96H194.558c-28.278 0-51.2-22.922-51.2-51.2v-83.528c0-28.278 22.922-51.2 51.2-51.2H831.24c28.278 0 51.2 22.922 51.2 51.2v83.528c0 28.278-22.922 51.2-51.2 51.2z" /><path d="M806.809 304.688l-58.245 666.45c-.544 6.246-6.714 11.9-12.99 11.9H290.226c-6.276 0-12.447-5.654-12.99-11.893L218.99 304.688c-.985-11.268-10.917-19.604-22.185-18.619s-19.604 10.917-18.619 22.185l58.245 666.45c2.385 27.401 26.278 49.294 53.795 49.294h445.348c27.517 0 51.41-21.893 53.796-49.301l58.244-666.443c.985-11.268-7.351-21.201-18.619-22.185s-21.201 7.351-22.185 18.619zM422.02 155.082V51.3c0-5.726 4.601-10.342 10.24-10.342h161.28c5.639 0 10.24 4.617 10.24 10.342v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V51.3c0-28.316-22.908-51.302-51.2-51.302H432.26c-28.292 0-51.2 22.987-51.2 51.302v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V51.3c0-28.316-22.908-51.302-51.2-51.302H432.26c-28.292 0-51.2 22.987-51.2 51.302v103.782c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48z" /><path d="M496.004 410.821v460.964c0 11.311 9.169 20.48 20.48 20.48s20.48-9.169 20.48-20.48V410.821c0-11.311-9.169-20.48-20.48-20.48s-20.48 9.169-20.48 20.48zm-192.435 1.767l39.936 460.964c.976 11.269 10.903 19.612 22.171 18.636s19.612-10.903 18.636-22.171l-39.936-460.964c-.976-11.269-10.903-19.612-22.171-18.636s-19.612 10.903-18.636 22.171zm377.856-3.535l-39.936 460.964c-.976 11.269 7.367 21.195 18.636 22.171s21.195-7.367 22.171-18.636l39.936-460.964c.976-11.269-7.367-21.195-18.636-22.171s-21.195 7.367-22.171 18.636z" /></g></svg>`, className: "" });
 
         const mymap = L.map('map', { zoomControl: false, maxZoom: 21 }).setView([48.707, 2.387], 14);
         L.control.zoom({ position: 'topright' }).addTo(mymap);
@@ -189,12 +196,20 @@
 
         // --- UI UTILS ---
         function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast'); toast.innerText = message; toast.style.display = 'block'; 
+            toast.className = `toast show ${type === 'error' ? 'error' : 'success'}`;
             if (type === 'error') sndErreur.play();
-            const toast = document.getElementById('toast'); toast.innerText = message; toast.style.display = 'block'; toast.className = `toast show ${type === 'error' ? 'error' : type === 'info' ? 'info' : 'success'}`;
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.style.display='none', 500); }, 3500);
         }
         function toggleLoader(message, show) { const loader = document.getElementById('status-loader'); document.getElementById('status-text').innerText = message; loader.style.display = show ? 'flex' : 'none'; }
-        
+        function triggerWhaou(x, y) {
+            const emojis = ['👍', '✨', '⭐', '💚'];
+            for (let i = 0; i < 8; i++) {
+                const p = document.createElement('div'); p.className = 'vote-particle'; p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+                p.style.left = x + 'px'; p.style.top = y + 'px'; p.style.setProperty('--x', (Math.random() * 200 - 100) + 'px'); p.style.setProperty('--y', (Math.random() * -200 - 50) + 'px');
+                document.body.appendChild(p); setTimeout(() => p.remove(), 800);
+            }
+        }
         function updateGlobalStats() {
             const markers = Object.values(allMarkers);
             document.getElementById('total-stats').innerText = `${markers.length} propositions | ${markers.reduce((s, m) => s + (m.data.votes || 0), 0)} votes`;
@@ -219,7 +234,18 @@
             }, 300);
         });
 
-        // --- LOGIQUE POPUPS ---
+        // --- GÉOGRAPHIE ---
+        function isPointInPoly(pt, poly) {
+            let x = pt.lng, y = pt.lat, inside = false;
+            let vs = poly.features[0].geometry.coordinates[0];
+            for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+                let xi = vs[i][0], yi = vs[i][1], xj = vs[j][0], yj = vs[j][1];
+                if (((yi > y) != (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) inside = !inside;
+            }
+            return inside;
+        }
+
+        // --- MARQUEURS ---
         function getPopupHTML(p) {
             const hasVoted = localStorage.getItem('voted_' + p.id) === 'true';
             const d = new Date(p.created_at); const dateStr = d.toLocaleDateString('fr-FR'); const heureStr = d.getHours().toString().padStart(2, '0') + 'h' + d.getMinutes().toString().padStart(2, '0');
@@ -237,26 +263,14 @@
             if(appState.isClosed || localStorage.getItem('voted_'+id) === 'true') return;
             const { error } = await supabaseClient.rpc('ajouter_vote', { id_corbeille: id });
             if(!error) {
-                sndVote.play();
-                localStorage.setItem('voted_'+id, 'true');
-                if(allMarkers[id]) { 
-                    allMarkers[id].data.votes += 1; allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data));
-                    const emojis = ['👍', '✨', '⭐', '💚'];
-                    for (let i = 0; i < 8; i++) {
-                        const p = document.createElement('div'); p.className = 'vote-particle'; p.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-                        p.style.left = ev.clientX + 'px'; p.style.top = ev.clientY + 'px';
-                        p.style.setProperty('--x', (Math.random() * 200 - 100) + 'px'); p.style.setProperty('--y', (Math.random() * -200 - 50) + 'px');
-                        document.body.appendChild(p); setTimeout(() => p.remove(), 800);
-                    }
-                    showToast("Merci ! ✨"); 
-                }
+                sndVote.play(); localStorage.setItem('voted_'+id, 'true');
+                if(allMarkers[id]) { allMarkers[id].data.votes += 1; allMarkers[id].setPopupContent(getPopupHTML(allMarkers[id].data)); triggerWhaou(ev.clientX, ev.clientY); showToast("Merci ! ✨"); }
             }
         }
 
         async function adminDelete(id) {
             if (!confirm("Supprimer ?")) return;
-            const cle = new URLSearchParams(window.location.search).get('admin');
-            const { error } = await supabaseClient.rpc('supprimer_proposition', { id_poubelle: id, cle_fournie: cle });
+            const { error } = await supabaseClient.rpc('supprimer_proposition', { id_poubelle: id, cle_fournie: new URLSearchParams(window.location.search).get('admin') });
             if (!error) { showToast("Supprimé."); markersCluster.removeLayer(allMarkers[id]); delete allMarkers[id]; updateGlobalStats(); }
         }
 
@@ -284,6 +298,15 @@
             }
         }
 
+        async function fetchOSM() {
+            toggleLoader("Corbeilles OSM...", true);
+            try {
+                const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent('[out:json][timeout:15];node["amenity"="waste_basket"](48.69,2.35,48.73,2.42);out body;')}`);
+                const d = await res.json(); d.elements.forEach(el => { if (isPointInPoly({lat:el.lat, lng:el.lon}, athisGeoJSON)) { const m = L.marker([el.lat, el.lon], {icon:existingBinIcon}).bindPopup('<div style="text-align:center"><b>Corbeille référencée sur OpenStreetMap</b></div>'); existingBinsCluster.addLayer(m); } });
+                toggleLoader("", false);
+            } catch (e) { setTimeout(fetchOSM, 5000); }
+        }
+
         async function loadMarkers() {
             await fetchConfig();
             const { data } = await supabaseClient.from('propositions_publiques').select('*');
@@ -296,43 +319,18 @@
             fetchOSM();
         }
 
-        async function fetchOSM() {
-            toggleLoader("Corbeilles OSM...", true);
-            try {
-                const res = await fetch(`https://overpass-api.de/api/interpreter?data=${encodeURIComponent('[out:json][timeout:15];node["amenity"="waste_basket"](48.69,2.35,48.73,2.42);out body;')}`);
-                const d = await res.json(); d.elements.forEach(el => { 
-                    let pt = {lat: el.lat, lng: el.lon};
-                    const vs = athisGeoJSON.features[0].geometry.coordinates[0]; let inside = false;
-                    for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                        let xi = vs[i][0], yi = vs[i][1], xj = vs[j][0], yj = vs[j][1];
-                        if (((yi > pt.lat) != (yj > pt.lat)) && (pt.lng < (xj - xi) * (pt.lat - yi) / (yj - yi) + xi)) inside = !inside;
-                    }
-                    if (inside) { const m = L.marker([el.lat, el.lon], {icon:existingBinIcon}).bindPopup('<div style="text-align:center"><b>Corbeille référencée sur OpenStreetMap</b></div>'); existingBinsCluster.addLayer(m); }
-                });
-                toggleLoader("", false);
-            } catch (e) { setTimeout(fetchOSM, 5000); }
-        }
-
         function copyLinkToClipboard(id) { const u = `https://athismons.github.io/corbeilles-athis/?proposition=${id}`; const t = document.createElement('textarea'); t.value = u; document.body.appendChild(t); t.select(); document.execCommand('copy'); document.body.removeChild(t); showToast("Lien copié ! ✨"); }
         function toggleHelp() { const m = document.getElementById('help-modal'); document.getElementById('btn-help').classList.remove('pulse-btn'); m.style.display = (m.style.display === 'flex') ? 'none' : 'flex'; }
 
         mymap.on('click', async (e) => {
-            if (appState.isClosed) { showToast("Les propositions sont closes.", "info"); return; }
-            const vs = athisGeoJSON.features[0].geometry.coordinates[0]; let inside = false;
-            for (let i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-                let xi = vs[i][0], yi = vs[i][1], xj = vs[j][0], yj = vs[j][1];
-                if (((yi > e.latlng.lat) != (yj > e.latlng.lat)) && (e.latlng.lng < (xj - xi) * (e.latlng.lat - yi) / (yj - yi) + xi)) inside = !inside;
-            }
-            if (!inside) { showToast("Sélectionner un emplacement situé à Athis-Mons.", "error"); return; }
-            
+            if (appState.isClosed) { showToast("Les propositions sont closes.", "error"); return; }
+            if (!isPointInPoly(e.latlng, athisGeoJSON)) { showToast("Sélectionner un emplacement situé à Athis-Mons.", "error"); return; }
             const sn = localStorage.getItem('user_nom')||'', se = localStorage.getItem('user_email')||'', st = localStorage.getItem('user_tel')||'';
             const f = `<div class="popup-form"><h3 style="color:var(--primary); margin:0 0 10px 0; font-size:15px;">Proposer une corbeille ici</h3><input type="text" id="f_nom" placeholder="Nom et Prénom" value="${sn}"><input type="email" id="f_email" placeholder="Email" value="${se}"><input type="tel" id="f_tel" placeholder="Téléphone" value="${st}"><div class="info-rgpd-form"><b>Rappel :</b> Vos coordonnées sont privées. Seule la description est publique.</div><label>Décrivez la raison et le lieu :</label><textarea id="f_raison" rows="4">Chargement de l'adresse...</textarea><div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;"><input type="checkbox" id="f_rgpd" style="width:auto; margin:0;"><label for="f_rgpd" style="font-size:10px; cursor:pointer;">J'accepte le traitement de ma demande.</label></div><button class="btn-submit" onclick="submitData(${e.latlng.lat}, ${e.latlng.lng})">Soumettre</button></div>`;
             L.popup().setLatLng(e.latlng).setContent(f).openOn(mymap);
-            
             try {
                 const r = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${e.latlng.lat}&lon=${e.latlng.lng}&addressdetails=1`);
-                const d = await r.json();
-                if(document.getElementById('f_raison')) document.getElementById('f_raison').value = (d.address ? `${d.address.house_number || ''} ${d.address.road || ''}`.trim() : "") + "\n";
+                const d = await r.json(); if(document.getElementById('f_raison')) document.getElementById('f_raison').value = (d.address ? `${d.address.house_number || ''} ${d.address.road || ''}`.trim() : "") + "\n";
             } catch(e){}
         });
 
@@ -341,14 +339,11 @@
             if(!nom || !em || !tel || !rai || !rg) { showToast("Champs requis.", "error"); return; }
             localStorage.setItem('user_nom', nom); localStorage.setItem('user_email', em); localStorage.setItem('user_tel', tel);
             const { data, error } = await supabaseClient.from('propositions').insert([{ lat:la, lng:ln, nom_complet:nom, email:em, telephone:tel, raison:rai, consentement_rgpd:rg }]).select();
-            if (!error && data) { 
-                sndAjout.play();
-                upsertMarker({...data[0]}); mymap.closePopup(); showToast("Proposition enregistrée ! ✨"); 
-            }
+            if (!error && data) { sndAjout.play(); upsertMarker({...data[0]}); mymap.closePopup(); showToast("Proposition enregistrée ! ✨"); }
         }
 
-        supabaseClient.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (p) => { if(p.eventType==='DELETE'){markersCluster.removeLayer(allMarkers[p.old.id]); delete allMarkers[p.old.id]; updateGlobalStats();} else upsertMarker(p.new); }).subscribe();
-        supabaseClient.channel('conf').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' }, fetchConfig).subscribe();
+        supabaseClient.channel('db').on('postgres_changes', { event: '*', schema: 'public', table: 'propositions' }, (p) => { if(p.eventType==='DELETE'){ if(allMarkers[p.old.id]) { markersCluster.removeLayer(allMarkers[p.old.id]); delete allMarkers[p.old.id]; updateGlobalStats(); } } else upsertMarker(p.new); }).subscribe();
+        supabaseClient.channel('cf').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'config' }, fetchConfig).subscribe();
 
         loadMarkers();
         setTimeout(() => document.getElementById('btn-help').classList.remove('pulse-btn'), 8000);
